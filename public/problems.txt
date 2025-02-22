@@ -1,0 +1,4 @@
+Challenges:
+- not sure how to modify the look-controls component. Solved by replacing import statements.
+
+Successes:

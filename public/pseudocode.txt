@@ -1,0 +1,60 @@
+1. user enters experience
+2. they are asked to choose between desktop or mobile
+3. they select desktop
+4. if they are the first user in the game then they are the "lead" player
+5. they are show their plane view, instructions, and overlay text indicating that they are on desktop and waiting for mobile player to join
+6. Once the second player joins, the desktop user can choose between collabortive or competative play
+
+6.1 They choose collabortive
+6.2 Players are show instructions
+6.3 Players have to tap to continue
+6.4 while waiting for the other player, the screen shows (waiting for other player..)
+6.5 once both players are ready the timer counts down to 1 (from 3) and the game starts
+6.6 they have a minute to collect go through hoops/collect 
+6.7 there is a counter indicting how many hoops they went through 
+
+7. game ends
+8. lead player is shown the screen and to choose between collaborative and competitive again
+9. lead player selects competative
+10. players are show instructions, once they tap through they start playing
+11. players are show their score and their oponents (split screen, or can show a ghost plane)
+12. game ends and they are shown their score vs the opponents score and who the winner is 
+
+game state variables:
+plane position
+device type (automatic assignment)
+other player's device type (automatic assignment)
+lead player (automatic assignment first one to join)
+player status (in game, ready to start)
+other player status (in game, ready to start) --> can be enum
+shared score
+individual score
+other player score
+current game mode (collaborative or competative)
+
+player status = waiting, ready, readyToPlay
+waiting: when a player is in the game but not yet on the proper device
+ready: automatically assigned when a player has entered the world, assigned when the game has ended
+readyToPlay: when the player has clicked continue after reading the instructions and is ready to play the game
+
+lead player: true or false
+
+
+game status = waiting for players, mode selection, instructions, playing, game end 
+waiting for players: default mode
+mode selection: when both players are in the game
+instructions: when a mode has been selected
+playing: when both players have clicked continue
+game end: when the timer ends
+
+
+info that needs to be shared:
+lead player
+game mode
+game status
+scores
+device type
+
+
+
+
