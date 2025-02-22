@@ -33,15 +33,15 @@
 <body>
 
     <!-- UI used throughout the experience -->
-    <div id="loading" class="ui-elements" style="display: block;">
-        <p>hello</p>
+    <div id="waitingUI" class="ui-elements" style="display: block;">
+        <p>Waiting for the other player to join</p>
     </div>
 
-    <div id="modeSelection" class="ui-elements" style="display: none;">
+    <div id="modeSelectionUI" class="ui-elements" style="display: none;">
         <p>Selecting the mode</p>
-        <div id="selectionButtons" style="display: none;">
-            <button>Competitive</button>
-            <button>Collaborative</button>
+        <div id="modeSelectionButtons" style="display: none;">
+            <button id="competitiveModeButton">Competitive</button>
+            <button id="collaborativeModeButton">Collaborative</button>
         </div> 
     </div>
 

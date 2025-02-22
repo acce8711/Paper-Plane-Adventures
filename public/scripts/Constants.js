@@ -5,3 +5,7 @@ const DEVICES = {
 }
 
 const EMPTY_ID = "";
+
+//UI constants
+const HIDE_UI = "none";
+const SHOW_UI = "block";

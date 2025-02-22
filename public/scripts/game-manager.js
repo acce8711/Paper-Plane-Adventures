@@ -1,3 +1,4 @@
+
 //component manages the game states
 AFRAME.registerComponent('game-manager', {
     schema: {
@@ -6,87 +7,91 @@ AFRAME.registerComponent('game-manager', {
 
     init: function () {
       const Context_AF = this;
+
+      //game logic variables
       Context_AF.device = AFRAME.utils.device.isMobile() ? DEVICES.mobile : DEVICES.desktop;
-      Context_AF.leadPlayer = false;
+      Context_AF.playerId = "";
 
-      Context_AF.loadingActions = loadingActions;
-
+      //UI variables
+      Context_AF.waitingUI = document.querySelector('#waitingUI');
+      Context_AF.modeSelectionUI = document.querySelector('#modeSelectionUI');
+      Context_AF.modeSelectionButtons = document.querySelector('#modeSelectionButtons');
+      Context_AF.competitiveModeButton = document.querySelector('#competitiveModeButton');
+      Context_AF.collaborativeModeButton = document.querySelector('#collaborativeModeButton');
 
       const socket = io();
 
             socket.on('connect', (userData) => {
-
-                // //put code here so that we know that socket.io has initailized ...
-                document.querySelector('#testObj').addEventListener('click', function(){
-                    console.log("emit")
-                    socket.emit('red');
+                //add an event listener for the competitive mode button when socket.io has been initialized
+                Context_AF.competitiveModeButton.addEventListener('click', function(){
+                    socket.emit('mode_selected', 'competitive');
                 });
 
-                // document.querySelector('#blue_button').querySelector('.button').addEventListener('click', function(){
-                //     socket.emit('blue');
-                // });
+                //add an event listener for the collaborative mode button when socket.io has been initialized
+                Context_AF.collaborativeModeButton.addEventListener('click', function(){
+                  socket.emit('mode_selected', 'collaborative');
+                });
             });
 
             // get global starter data
             socket.on('starter_data', (data) => {
-              console.log("num players:",data.length)
               //if there is only one other player and they are on a different device then then send player data to server
-              if(data.length === 1)
+              console.log("data len: ", data.players.length)
+              if(data.players.length === 1)
               {
                 //if an existing player is already using the same device then the current player must join on a different device
-                console.log("data ", data)
-                if(data[0].device !== Context_AF.device)
+                if(data.players[0].device !== Context_AF.device)
                 {
                   const unusedDevice = Context_AF.device === DEVICES.mobile ? DEVICES.desktop : DEVICES.mobile;
                   console.log("Player 1 is already using ", Context_AF.device, ". Please use ", unusedDevice);
                 }
                 //if the players are on different devices then the game can begin
                 else{
-                  console.log("it's diff")
+                  console.log("it's diff");
+                  Context_AF.playerId = data.socketId;
                   socket.emit('player_ready', {device: Context_AF.device})
                 }
               }
-              else if(data.length === 0){
-                Context_AF.leadPlayer = true;
+              else if(data.players.length === 0){
                 console.log("it's diff 2")
+                Context_AF.playerId = data.socketId;
                 socket.emit('player_ready', {device: Context_AF.device})
               }
             });
 
-            // //listen to event from server
-            socket.on('color_change', (data) => {
-                let colorStr = 'rgb(' + data.r + ',' + data.g + ',' + data.b + ')';
-                console.log('color_change:' + colorStr);
-                //document.body.style.backgroundColor = colorStr;
-            });
+            //if the other player leaves the game, then put the current player into a waiting state
+            socket.on('waiting', (data) => {
+              console.log(Context_AF.playerId === data.leadPlayer ? "I am the lead player" : "I am not the lead player")
+              //hide the currently displayed UI
+              const activeUI = document.querySelector(".activeUI");
+              for(uiElement in activeUI) {
+                uiElement.style.display = HIDE_UI;
+                uiElement.classList.remove("activeUI");
+              }
+              //display the loading UI
+              Context_AF.waitingUI.style.display = SHOW_UI;
+            })
 
-            socket.on('hello', (data) => {
-              console.log(data);
-              //document.body.style.backgroundColor = colorStr;
-          });
+            //listen for when both players are ready to begin mode selection
+            socket.on('mode_selection', (data) => {
+              console.log("Plyaer id: ", Context_AF.playerId, " lead player id: ", data)
+              console.log(Context_AF.playerId === data ? "I am selecting the mode" : "I am waiting for the mode to be selected")
+              //hide the currently displayed UI
+              Context_AF.waitingUI.style.display = "none";
+              //display the mode selection UI
+              Context_AF.modeSelectionUI.style.display = SHOW_UI;
+              Context_AF.modeSelectionUI.classList.add("activeUI");
+              //display the mode selection buttons if the current player is a lead player
+              if(Context_AF.playerId === data)
+                {
+                  Context_AF.modeSelectionButtons.style.display = SHOW_UI;
+                  Context_AF.modeSelectionButtons.classList.add("activeUI");
+                }
+            })
 
-          //socket listens if players can start playing
-          socket.on('playing', (data) => {
-            switch (data) {
-              case "modeSelection":
-                  document.querySelector("#loading").style.display = "none";
-                  document.querySelector("#modeSelection").style.display = "block";
-                  if(Context_AF.leadPlayer)
-                  {
-                    document.querySelector("#selectionButtons").style.display = "block";
-                  }
-                  else
-                    console.log("I am waiting for mode selection");
-                  break;
-              case "loading":
-                  Context_AF.loadingActions(Context_AF);
-              default:
-                  break;
-            }
+          //listens if the player is waiting for another player
 
-            console.log("data speical: ",data);
-            //document.body.style.backgroundColor = colorStr;
-        });
+          //listens if the player cna 
     },
 
     update: function () {
@@ -108,19 +113,5 @@ const desktopScene = function() {
 
 const mobileScene = function() {
 
-}
-
-//function handles the actions that need to happen when the game state is loading
-const loadingActions = function(Context_AF) {
-  console.log("looks like we're waiting for player");
-  //updating the lead player to be the player who is waiting
-  //may need to be an emmited event from server side instead
-  Context_AF.leadPlayer = true;
-  console.log(Context_AF.leadPlayer);
-
-  document.querySelector("#loading").style.display = "block";
-  document.querySelector("#modeSelection").style.display = "none";
-
-  
 }
 

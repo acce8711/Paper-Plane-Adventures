@@ -1,4 +1,10 @@
 Challenges:
 - not sure how to modify the look-controls component. Solved by replacing import statements.
+- organizing the game logic between the server and the client
+    - originally had a lot of duplicating/redundant logic
+    - asked in server about best practices
+    - got suggestion to write out logic 
+    - wrote out logic, game states, and when they are triggered
+
 
 Successes:
