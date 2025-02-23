@@ -18,13 +18,25 @@
     <script>
 
             AFRAME.registerComponent('hi', {
+            init: function () {
+                Context_AF = this;
+                Context_AF.camera = document.querySelector("#camera");
+                Context_AF.prevRotationX = Context_AF.camera.object3D.rotation.x;
+                Context_AF.event = new Event("xRotation");
+            },
             // ...
             tick: function (time, timeDelta) {
-                const rotation = document.querySelector("#camera").object3D.rotation.x;
-                document.querySelector("#camera").setAttribute("position", `0 ${document.querySelector("#camera").getAttribute("position").y + 0.05*rotation} ${document.querySelector("#camera").getAttribute("position").z - 0.0}`)
+                const rotation = Context_AF.camera.object3D.rotation.x;
+                // if(rotation != Context_AF.prevRotationX) {   
+                    Context_AF.prevRotationX = rotation;
+                    //document.querySelector("#camera").setAttribute("position", `0 ${document.querySelector("#camera").getAttribute("position").y + 0.05*rotation} ${document.querySelector("#camera").getAttribute("position").z - 0.0}`)
+                    //if(Context_AF.camera.getAttribute("modified-look-controls"))
+                    Context_AF.camera.dispatchEvent(Context_AF.event);
+                // }
             }
             // ...
             });
+
 
     </script>
     
@@ -33,7 +45,7 @@
 <body>
 
     <!-- UI used throughout the experience -->
-    <div id="waitingUI" class="ui-elements" style="display: block;">
+    <div id="waitingUI" class="ui-elements activeUI" style="display: block;">
         <p>Waiting for the other player to join</p>
     </div>
 
@@ -43,6 +55,20 @@
             <button id="competitiveModeButton">Competitive</button>
             <button id="collaborativeModeButton">Collaborative</button>
         </div> 
+    </div>
+
+    <div id="instructionsUI" class="ui-elements" style="display: none;">
+        <p>Displaying the instructions</p>
+        <button id="continueButton">Ready to start playing</button>
+    </div>
+
+    <div id="playingUI" class="ui-elements" style="display: none;">
+        <p>Playing the game</p>
+    </div>
+
+    <div id="horizontalControl" class="ui-elements" style="display: none;">
+        <button id="left">Left</button>
+        <button id="right">Right</button>
     </div>
 
     <a-scene obb-collider="showColliders: false" id="scene" physics="driver: ammo; debug: false; debugDrawMode: 1;">
@@ -65,7 +91,8 @@
         <a-entity game-manager></a-entity>
 
         <!-- camera -->
-        <a-entity id="camera" 
+        <a-entity 
+                  id="camera" 
                   camera="zoom: 1.5" 
                   wasd-controls
                   position="0 1.6 0">

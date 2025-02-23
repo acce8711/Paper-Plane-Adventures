@@ -1,3 +1,4 @@
+const { time } = require("console");
 const express   = require("express")
 const app       = express();
 const http      = require("http");
@@ -18,12 +19,20 @@ const GAME_STATES = {
 }
 
 const MAX_PLAYERS = 2;
+const MAX_HORIZONTAL_DIST = 4;
+const MIN_HORIZONTAL_DIST = -4;
+const MAX_TIME = 3000/8;
 
 const PLAYING_ROOM = "playingRoom";
 
 
 const playersData = [];
 let currGameState = GAME_STATES.waiting;
+let currMode = "";
+let timeLeft = 600;
+let planeXPos = 0;
+let planeYPos = 1.6;
+
 
 
 app.get('/', function (req, res) {
@@ -51,6 +60,8 @@ io.on('connection', (socket) => {
             if(playersData.length > 0)
             {
                 playersData[0].isLeadPlayer = true;
+                currGameState = GAME_STATES.waiting;
+                planeYPos = 1.6;
                 emitGameStateEvents();
             }
         }
@@ -61,9 +72,12 @@ io.on('connection', (socket) => {
 
     //socket receives the player data such as device type, and if the player is a lead
     socket.on('player_ready', (data) => {   
+        console.log("player ready")
         playersData.push({playerId: socket.id,
                           isLeadPlayer: playersData.length === 0,
-                          device: data.device
+                          device: data.device,
+                          playerContinue: false,
+                          score: 0
         });
 
         console.log("players: ", playersData);
@@ -72,8 +86,7 @@ io.on('connection', (socket) => {
         socket.join(PLAYING_ROOM);
         
         //update the game state if two valid players are playing
-        if(playersData.length === MAX_PLAYERS)
-        {
+        if(playersData.length === MAX_PLAYERS) {
             currGameState = GAME_STATES.modeSelection;
             //emit a game state event to the client
             emitGameStateEvents();
@@ -83,7 +96,55 @@ io.on('connection', (socket) => {
     //socket listens for when a mode has been selected
     socket.on('mode_selected', (data) => {
         console.log(data);
+        currMode = data;
+        currGameState = GAME_STATES.instructions;
+        emitGameStateEvents();
     })
+
+    //socket listens for when a player is ready to continue (is done reading the instructions)
+    socket.on('player_continue', (data) => {
+        console.log("player ready to continue");
+        const playerIndex = playersData.findIndex(item => item.playerId === socket.id);
+        console.log("player continue index: ", playerIndex);
+        playersData[playerIndex].playerContinue = true;
+
+        let numPlayersContinue = 0;
+        playersData.forEach(player => {if (player.playerContinue) numPlayersContinue++});
+        console.log("Num of players ready to continueL ", numPlayersContinue);
+        //if both players are ready to continue
+        if (numPlayersContinue === MAX_PLAYERS)
+        {
+            currGameState = GAME_STATES.playing;
+            emitGameStateEvents();
+        }
+    })
+
+    //socket 
+    socket.on('x_rotation_update', (data) => {
+        // console.log("rotation ", data.xRotation)
+        console.log("positon orig: ", planeYPos);
+        console.log("add: ", data.xRotation * 0.05);
+        
+        planeYPos = planeYPos + (0.05 * data.xRotation);
+        console.log(planeYPos);
+        io.to(PLAYING_ROOM).emit('plane_update', {planeXPos: planeXPos, planeYPos: planeYPos});
+    })
+
+    //
+    socket.on('move_right', (data) => {
+        // console.log("rotation ", data.xRotation)
+        io.to(PLAYING_ROOM).emit('move_towards_point', {destPoint: MAX_HORIZONTAL_DIST, timeUnit: MAX_TIME})
+    })
+
+    socket.on('move_left', (data) => {
+        // console.log("rotation ", data.xRotation)
+        io.to(PLAYING_ROOM).emit('move_towards_point', {destPoint: MIN_HORIZONTAL_DIST, timeUnit: MAX_TIME})
+    })
+
+    socket.on('stop_horizontal_movement', (data) => {
+        io.to(PLAYING_ROOM).emit('stop_horizontal')
+    })
+
 });
 
 server.listen(LISTEN_PORT);
@@ -105,6 +166,39 @@ const emitGameStateEvents = function() {
         //emit the mode selection event with the ID of the lead player
         case GAME_STATES.modeSelection:
             io.to(PLAYING_ROOM).emit("mode_selection", playersData[leadPlayerIndex].playerId);
+            break;
+        //emit the instructions event with the selected mode
+        case GAME_STATES.instructions:
+            io.to(PLAYING_ROOM).emit("instructions", currMode);
+            break;
+        //emit the playing event with the selected mode
+        case GAME_STATES.playing:
+            io.to(PLAYING_ROOM).emit("playing", playersData[leadPlayerIndex].playerId);
+            //code reference: https://stackoverflow.com/questions/29311311/how-do-i-take-away-from-a-variable-a-certain-number-of-times-every-second-javasc/29311357
+            const intervalId = setInterval(function() {
+                    //when timer is up, end the game
+                    console.log(timeLeft);
+                    if(timeLeft === 0) {
+                        clearInterval(intervalId);
+                        timeLeft = 10;
+                        currGameState = GAME_STATES.gameEnd;
+                        emitGameStateEvents();
+                    }
+                    else if (currGameState === GAME_STATES.waiting)
+                    {
+                        console.log("game stopped due to playier leaving")
+                        clearInterval(intervalId);
+                        timeLeft = 10;
+                    }
+                    else {
+                        timeLeft--;
+                        io.to(PLAYING_ROOM).emit('time_update', {timeLeft: timeLeft});
+                    }
+                }, 1000)
+            break;
+        //emit the playing event with the selected mode
+        case GAME_STATES.gameEnd:
+            io.to(PLAYING_ROOM).emit('game_end', playersData[leadPlayerIndex].playerId);
             break;
         default:
             break;
