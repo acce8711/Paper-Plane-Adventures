@@ -14,6 +14,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="scripts/Constants.js"></script>
     <script src="scripts/game-manager.js"></script>
+    <script src="scripts/desktop-plane-movement.js"></script>
 
     <script>
 
@@ -22,22 +23,37 @@
                 Context_AF = this;
                 Context_AF.camera = document.querySelector("#camera");
                 Context_AF.prevRotationX = Context_AF.camera.object3D.rotation.x;
-                Context_AF.event = new Event("xRotation");
+                Context_AF.yPosFactor = 0;
+
+                //check camera rotation every x seconds and emit an event if the rotation has changed
+                Context_AF.intervalId = setInterval(function() {
+                        const rotation = Context_AF.camera.object3D.rotation.x;
+                        if(Math.abs(Context_AF.prevRotationX - rotation) >= 0.05)
+                        {
+                            Context_AF.prevRotationX = rotation;
+                            //update the amount the camera y position is being updated each frame
+                            Context_AF.yPosFactor = (0.05 * Context_AF.prevRotationX);
+                            const event = new CustomEvent("xRotation", {
+                                detail: {
+                                    planeXRotation: Context_AF.prevRotationX,
+                                    planeYPosFactor: Context_AF.yPosFactor
+                                }
+                            });
+                            Context_AF.camera.dispatchEvent(event);
+                        }
+                    }, 200)
             },
-            // ...
-            tick: function (time, timeDelta) {
-                const rotation = Context_AF.camera.object3D.rotation.x;
-                // if(rotation != Context_AF.prevRotationX) {   
-                    Context_AF.prevRotationX = rotation;
-                    //document.querySelector("#camera").setAttribute("position", `0 ${document.querySelector("#camera").getAttribute("position").y + 0.05*rotation} ${document.querySelector("#camera").getAttribute("position").z - 0.0}`)
-                    //if(Context_AF.camera.getAttribute("modified-look-controls"))
-                    Context_AF.camera.dispatchEvent(Context_AF.event);
-                // }
+
+            tick: function() {
+                Context_AF.camera.object3D.position.y = Context_AF.camera.object3D.position.y + Context_AF.yPosFactor;
+            },
+
+            remove: function() {
+                clearInterval(Context_AF.intervalId);
             }
-            // ...
             });
 
-
+            
     </script>
     
 
@@ -88,7 +104,7 @@
 
         <a-entity environment="preset: default"></a-entity>
 
-        <a-entity game-manager></a-entity>
+        
 
         <!-- camera -->
         <a-entity 
@@ -100,14 +116,16 @@
                       cursor="rayOrigin:mouse;"
                       raycaster="far:20; interval:200; objects:.interactive">
             </a-entity>
+        </a-entity>
 
-            <a-entity id="plane"
+        <a-entity id="plane"
                   rotation="-20 -180 0" 
-                  position="0 -1 -3"
+                  position="0 0 0"
                   scale="0.1 0.1 0.1" 
                   gltf-model="#paper_plane">
-            </a-entity>
         </a-entity>
+
+        <a-entity game-manager></a-entity>
 
         <!-- <a-box class="interactive" id="box" position="0 0 -4" foo color="#FFF"></a-box> -->
 

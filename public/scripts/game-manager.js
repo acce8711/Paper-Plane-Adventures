@@ -24,6 +24,8 @@ AFRAME.registerComponent('game-manager', {
       Context_AF.continueButton = document.querySelector('#continueButton');
       Context_AF.playingUI = document.querySelector('#playingUI');
 
+      
+
       const socket = io();
 
             socket.on('connect', (userData) => {
@@ -43,9 +45,10 @@ AFRAME.registerComponent('game-manager', {
                 })
 
                 //add event listener to listen for when the camera x rotation has been changes
-                document.querySelector("#camera").addEventListener('xRotation', function() {
-                  const xRotation = document.querySelector("#camera").object3D.rotation.x;
-                  socket.emit('x_rotation_update', {xRotation: xRotation});
+                document.querySelector("#camera").addEventListener('xRotation', function(e) {
+                  socket.emit('x_rotation_update', {planeXRotation: e.detail.planeXRotation,
+                                                    planeYPosFactor: e.detail.planeYPosFactor
+                              });   
                 })
 
                 //add event listener to listen for right control
@@ -87,12 +90,20 @@ AFRAME.registerComponent('game-manager', {
                   console.log("it's diff");
                   Context_AF.playerId = data.socketId;
                   socket.emit('player_ready', {device: Context_AF.device})
+
+                  //desktop camera pos
+                  document.querySelector("#camera").object3D.position.set(DESKTOP_CAMERA.x, DESKTOP_CAMERA.y, DESKTOP_CAMERA.z);
+                  document.querySelector("#camera").object3D.rotation.x = THREE.MathUtils.degToRad(DESKTOP_CAMERA.xRotation);
                 }
               }
               else if(data.players.length === 0){
                 console.log("it's diff 2")
                 Context_AF.playerId = data.socketId;
                 socket.emit('player_ready', {device: Context_AF.device})
+
+                //mobile camera pos
+                document.querySelector("#plane").object3D.parent = document.querySelector("#camera").object3D;
+                document.querySelector("#plane").object3D.position.set(0, -1, -3)
               }
             });
 
@@ -104,6 +115,7 @@ AFRAME.registerComponent('game-manager', {
 
               document.querySelector("#camera").removeAttribute('modified-look-controls');
               document.querySelector("#camera").removeAttribute('hi');
+
 
               displayUI([Context_AF.waitingUI]);
             })
@@ -134,7 +146,9 @@ AFRAME.registerComponent('game-manager', {
                 document.querySelector("#camera").setAttribute('hi', {});
                 document.querySelector("#horizontalControl").style.display = SHOW_UI;
                 document.querySelector("#horizontalControl").classList.add("activeUI");
-                
+              }
+              else {
+                document.querySelector("#plane").setAttribute('desktop-plane-movement', {});
               }
 
               // if(data.mode === "competitive") {
@@ -154,7 +168,12 @@ AFRAME.registerComponent('game-manager', {
 
             //listens for the changes in the plane position
             socket.on('plane_update', (data) => {
-              document.querySelector("#camera").object3D.position.y = data.planeYPos;
+              console.log("looks like i got an update")
+              const manager = document.querySelector('[desktop-plane-movement]').components['desktop-plane-movement'];
+              console.log(manager);
+              manager.changeState("yPosFactor", data.planeYPosFactor);
+              manager.changeState("planeXRotation", (data.planeXRotation)*(-1));
+              //document.querySelector("#camera").object3D.position.y = data.planeYPos;
 
               // if(data.mode === "competitive"){
               //   //update the enemy player horizontal position if 
@@ -184,25 +203,25 @@ AFRAME.registerComponent('game-manager', {
             })
 
             socket.on('stop_horizontal', (data) => {
-              console.log("we stopped")
+              //console.log("we stopped")
               Context_AF.horizontalMovement = false;
             })
 
             //listens for when the score has been updated
             socket.on('score_update', (data) => {
-              console.log("score: ", data);
+              //console.log("score: ", data);
             })
             
             //listens for when the game timer has been updated
             socket.on('time_update', (data) => {
-              console.log("curr time left: ", data.timeLeft);
+              //console.log("curr time left: ", data.timeLeft);
             })
 
             //listens for when the game has ended
             socket.on('game_end', (data) => {
-              console.log("game has ended");
-              console.log("Plyaer id: ", Context_AF.playerId, " lead player id: ", data)
-              console.log(Context_AF.playerId === data ? "I am selecting the mode" : "I am waiting for the mode to be selected")
+              //console.log("game has ended");
+              //console.log("Plyaer id: ", Context_AF.playerId, " lead player id: ", data)
+              //console.log(Context_AF.playerId === data ? "I am selecting the mode" : "I am waiting for the mode to be selected")
               
 
               

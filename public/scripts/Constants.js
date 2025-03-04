@@ -4,6 +4,13 @@ const DEVICES = {
     desktop: "desktop"
 }
 
+const DESKTOP_CAMERA = {
+    x: 0,
+    y: 8,
+    z: 8,
+    xRotation: -36
+}
+
 const EMPTY_ID = "";
 
 //UI constants

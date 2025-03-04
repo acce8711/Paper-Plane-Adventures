@@ -121,13 +121,11 @@ io.on('connection', (socket) => {
 
     //socket 
     socket.on('x_rotation_update', (data) => {
-        // console.log("rotation ", data.xRotation)
-        console.log("positon orig: ", planeYPos);
-        console.log("add: ", data.xRotation * 0.05);
-        
-        planeYPos = planeYPos + (0.05 * data.xRotation);
-        console.log(planeYPos);
-        io.to(PLAYING_ROOM).emit('plane_update', {planeXPos: planeXPos, planeYPos: planeYPos});
+        // get the id of the player who didn't emit this event
+        const playerIndex = playersData.findIndex(player => player.playerId != socket.id);
+        const playerID = playersData[playerIndex].playerId;
+        console.log("playerID",playerID);
+        io.to(playerID).emit('plane_update', {planeXRotation: data.planeXRotation, planeYPosFactor: data.planeYPosFactor});
     })
 
     //
