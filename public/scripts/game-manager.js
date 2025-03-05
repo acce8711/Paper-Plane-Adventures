@@ -90,7 +90,7 @@ AFRAME.registerComponent('game-manager', {
               if(data.players.length === 1)
               {
                 //if an existing player is already using the same device then the current player must join on a different device
-                if(data.players[0].device == Context_AF.device)
+                if(data.players[0].device !== Context_AF.device)
                 {
                   const unusedDevice = Context_AF.device === DEVICES.mobile ? DEVICES.desktop : DEVICES.mobile;
                   console.log("Player 1 is already using ", Context_AF.device, ". Please use ", unusedDevice);
