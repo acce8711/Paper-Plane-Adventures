@@ -16,7 +16,7 @@ AFRAME.registerComponent("desktop-plane-movement", {
     },
 
     remove: function() {
-
+        
     }
 })
 

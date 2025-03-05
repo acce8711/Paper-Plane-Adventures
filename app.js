@@ -29,8 +29,7 @@ const PLAYING_ROOM = "playingRoom";
 const playersData = [];
 let currGameState = GAME_STATES.waiting;
 let currMode = "";
-let timeLeft = 600;
-let planeXPos = 0;
+let timeLeft = 100;
 let planeYPos = 1.6;
 
 
@@ -128,20 +127,33 @@ io.on('connection', (socket) => {
         io.to(playerID).emit('plane_update', {planeXRotation: data.planeXRotation, planeYPosFactor: data.planeYPosFactor});
     })
 
-    //
+    
     socket.on('move_right', (data) => {
         // console.log("rotation ", data.xRotation)
-        io.to(PLAYING_ROOM).emit('move_towards_point', {destPoint: MAX_HORIZONTAL_DIST, timeUnit: MAX_TIME})
+        const mainPlayerIndex = playersData.findIndex(player => player.isLeadPlayer);
+        const mainPlayerId = playersData[mainPlayerIndex].playerId;
+        io.to(PLAYING_ROOM).emit('move_towards_point', {destPoint: MAX_HORIZONTAL_DIST, timeUnit: MAX_TIME, mainPlayer: mainPlayerId})
     })
 
+
     socket.on('move_left', (data) => {
-        // console.log("rotation ", data.xRotation)
-        io.to(PLAYING_ROOM).emit('move_towards_point', {destPoint: MIN_HORIZONTAL_DIST, timeUnit: MAX_TIME})
+        const mainPlayerIndex = playersData.findIndex(player => player.isLeadPlayer);
+        const mainPlayerId = playersData[mainPlayerIndex].playerId;
+        io.to(PLAYING_ROOM).emit('move_towards_point', {destPoint: MIN_HORIZONTAL_DIST, timeUnit: MAX_TIME, mainPlayer: mainPlayerId})
     })
+
 
     socket.on('stop_horizontal_movement', (data) => {
         io.to(PLAYING_ROOM).emit('stop_horizontal')
     })
+
+    //listens for an update in score
+    socket.on('score', (data) => {
+        const playerIndex = playersData.findIndex(player => player.playerId != socket.id);
+        const playerID = playersData[playerIndex].playerId;
+        io.to(playerID).emit('score_update', {score: data.score, gameMode: currMode});
+    })
+    
 
 });
 
@@ -171,14 +183,16 @@ const emitGameStateEvents = function() {
             break;
         //emit the playing event with the selected mode
         case GAME_STATES.playing:
-            io.to(PLAYING_ROOM).emit("playing", playersData[leadPlayerIndex].playerId);
+            io.to(PLAYING_ROOM).emit("playing", {mode: currMode});
             //code reference: https://stackoverflow.com/questions/29311311/how-do-i-take-away-from-a-variable-a-certain-number-of-times-every-second-javasc/29311357
+            let secondsPassed = 0;
             const intervalId = setInterval(function() {
+                    secondsPassed += 1;
                     //when timer is up, end the game
                     console.log(timeLeft);
                     if(timeLeft === 0) {
                         clearInterval(intervalId);
-                        timeLeft = 10;
+                        timeLeft = 100;
                         currGameState = GAME_STATES.gameEnd;
                         emitGameStateEvents();
                     }
@@ -186,12 +200,20 @@ const emitGameStateEvents = function() {
                     {
                         console.log("game stopped due to playier leaving")
                         clearInterval(intervalId);
-                        timeLeft = 10;
+                        timeLeft = 100;
                     }
                     else {
                         timeLeft--;
                         io.to(PLAYING_ROOM).emit('time_update', {timeLeft: timeLeft});
                     }
+
+                    //send obstacle ring coordinates
+                    if(secondsPassed === 5)
+                    {
+                        secondsPassed = 0;
+                        io.to(PLAYING_ROOM).emit('generate_obstacle', {x: Math.floor(Math.random() * 10 - 5), y:0, z:-50})
+                    }
+
                 }, 1000)
             break;
         //emit the playing event with the selected mode

@@ -11,8 +11,9 @@ AFRAME.registerComponent('game-manager', {
       //game logic variables
       Context_AF.device = AFRAME.utils.device.isMobile() ? DEVICES.mobile : DEVICES.desktop;
       Context_AF.playerId = "";
-      Context_AF.selectedMode = "";
+      Context_AF.isLeadPlayer = false;
       Context_AF.horizontalMovement = false;
+      Context_AF.scene = document.querySelector("a-scene");
 
       //UI variables
       Context_AF.waitingUI = document.querySelector('#waitingUI');
@@ -23,6 +24,9 @@ AFRAME.registerComponent('game-manager', {
       Context_AF.instructionsUI = document.querySelector('#instructionsUI');
       Context_AF.continueButton = document.querySelector('#continueButton');
       Context_AF.playingUI = document.querySelector('#playingUI');
+      Context_AF.score = 0;
+      Context_AF.opponentScore = 0;
+      Context_AF.opponentPlanePos = {x:0, y:0, z:0};
 
       
 
@@ -56,7 +60,7 @@ AFRAME.registerComponent('game-manager', {
                   socket.emit('move_right');
                 })
 
-                //add event listener to listen for right control
+                //add event listener to listen for stopping right control
                 document.querySelector("#right").addEventListener('mouseup', function() {
                   console.log("stop ht wbhdhjdhsgdvs")
                   socket.emit('stop_horizontal_movement');
@@ -67,9 +71,15 @@ AFRAME.registerComponent('game-manager', {
                   socket.emit('move_left');
                 })
 
-                //add event listener to listen for right control
+                //add event listener to listen for stopping right control
                 document.querySelector("#left").addEventListener('mouseup', function() {
                   socket.emit('stop_horizontal_movement');
+                })
+
+                //add event listener for score update
+                document.querySelector('#plane').addEventListener('scoreUpdate', function() {
+                  Context_AF.score += 1;
+                  socket.emit('score', {score: Context_AF.score});
                 })
             });
 
@@ -80,7 +90,7 @@ AFRAME.registerComponent('game-manager', {
               if(data.players.length === 1)
               {
                 //if an existing player is already using the same device then the current player must join on a different device
-                if(data.players[0].device !== Context_AF.device)
+                if(data.players[0].device == Context_AF.device)
                 {
                   const unusedDevice = Context_AF.device === DEVICES.mobile ? DEVICES.desktop : DEVICES.mobile;
                   console.log("Player 1 is already using ", Context_AF.device, ". Please use ", unusedDevice);
@@ -99,6 +109,7 @@ AFRAME.registerComponent('game-manager', {
               else if(data.players.length === 0){
                 console.log("it's diff 2")
                 Context_AF.playerId = data.socketId;
+                Context_AF.isLeadPlayer = true;
                 socket.emit('player_ready', {device: Context_AF.device})
 
                 //mobile camera pos
@@ -110,6 +121,7 @@ AFRAME.registerComponent('game-manager', {
             //if the other player leaves the game, then put the current player into a waiting state
             socket.on('waiting', (data) => {
               console.log("Plyaer id: ", Context_AF.playerId, " lead player id: ", data)
+              Context_AF.isLeadPlayer = data === Context_AF.playerId;
               console.log(Context_AF.playerId === data ? "I am the lead player" : "I am not the lead player")
               //hide the currently displayed UI and display the waiting UI
 
@@ -141,7 +153,32 @@ AFRAME.registerComponent('game-manager', {
               //hide the currently displayed UI and display the playing UI
               displayUI([Context_AF.playingUI]);
 
-              if(Context_AF.playerId === data) {
+              if(data.mode === 'competitive'){
+                document.querySelector("#plane").setAttribute('plane-collider', {});
+              }
+              else if (data.mode === "collaborative" && Context_AF.isLeadPlayer) {
+                console.log("assigning plane collider to lead player")
+                document.querySelector("#plane").setAttribute('plane-collider', {});
+              }
+                
+              //add ghost oponent plane for competitive mode
+              if(data.mode === "competitive"){
+                const planeEl = document.createElement("a-entity");
+                planeEl.id = "opponentPlane";
+                planeEl.object3D.rotation.x = THREE.MathUtils.degToRad(-20);
+                planeEl.object3D.rotation.x = THREE.MathUtils.degToRad(-180);
+                planeEl.object3D.scale.set(0.1, 0.1, 0.1);
+                planeEl.setAttribute('gltf-model', '#paper_plane')
+        
+                planeEl.setAttribute('ring-plane', {});
+                planeEl.setAttribute('obb-collider', {});
+                planeEl.object3D.position.set(Math.floor(Math.random() * 10 - 5), 0, -50)
+                Context_AF.scene.appendChild(planeEl);
+              }
+
+
+
+              if(Context_AF.isLeadPlayer) {
                 document.querySelector("#camera").setAttribute('modified-look-controls', {});
                 document.querySelector("#camera").setAttribute('hi', {});
                 document.querySelector("#horizontalControl").style.display = SHOW_UI;
@@ -164,6 +201,18 @@ AFRAME.registerComponent('game-manager', {
               // if(Context_AF.device === DEVICES.desktop){
 
               // }
+            })
+
+            
+
+            //listens for when to generate an obstacle
+            socket.on('generate_obstacle', (data) => {
+              console.log("generate obstacle")
+              const obstacleEl = document.createElement("a-ring");
+              obstacleEl.setAttribute('ring-obstacle', {});
+              obstacleEl.setAttribute('obb-collider', {});
+              obstacleEl.object3D.position.set(data.x, data.y, data.z);
+              Context_AF.scene.appendChild(obstacleEl);
             })
 
             //listens for the changes in the plane position
@@ -193,11 +242,13 @@ AFRAME.registerComponent('game-manager', {
               // });
               Context_AF.horizontalMovement = true;
               const moveX = setInterval(function() {
-                const currPosX = document.querySelector("#camera").object3D.position.x;
+                const objectName = data.mainPlayer === Context_AF.playerId ? "#camera" : "#plane";
+                console.log("My obj", objectName)
+                const currPosX = document.querySelector(objectName).object3D.position.x;
                 console.log("hor mov: ", Context_AF.horizontalMovement);
                 if(currPosX < 8 && currPosX > -8)
-                  document.querySelector("#camera").object3D.position.x += 0.05;
-                if( currPosX >= 8 || currPosX <= -8 || !Context_AF.horizontalMovement)
+                  document.querySelector(objectName).object3D.position.x += 0.05;
+                if(currPosX >= 8 || currPosX <= -8 || !Context_AF.horizontalMovement)
                   clearInterval(moveX);  
             }, 16.7)
             })
@@ -209,12 +260,20 @@ AFRAME.registerComponent('game-manager', {
 
             //listens for when the score has been updated
             socket.on('score_update', (data) => {
+              if(data.gameMode === 'competitive'){
+                Context_AF.opponentScore = data.score;
+                console.log("comp score: ", Context_AF.opponentScore);
+              }
+              else {
+                Context_AF.score = data.score;
+                console.log("collab score: ", Context_AF.score);
+              }
               //console.log("score: ", data);
             })
             
             //listens for when the game timer has been updated
             socket.on('time_update', (data) => {
-              //console.log("curr time left: ", data.timeLeft);
+              console.log("curr time left: ", data.timeLeft);
             })
 
             //listens for when the game has ended
@@ -222,10 +281,15 @@ AFRAME.registerComponent('game-manager', {
               //console.log("game has ended");
               //console.log("Plyaer id: ", Context_AF.playerId, " lead player id: ", data)
               //console.log(Context_AF.playerId === data ? "I am selecting the mode" : "I am waiting for the mode to be selected")
+              document.querySelector("#plane").removeAttribute('plane-collider');
+              document.querySelector("#plane").removeAttribute('obb-collider');
+              document.querySelector("#camera").removeAttribute('modified-look-controls');
+              document.querySelector("#camera").removeAttribute('hi');
+              document.querySelector("#plane").removeAttribute('desktop-plane-movement');
+              document.querySelector("#elementGenerator").removeAttribute('element-generator');
               
-
               
-              
+              console.log("total score ", Context_AF.score);
               //hide the currently displayed UI and display the mode selection UI
               displayUI([Context_AF.modeSelectionUI, Context_AF.modeSelectionButtons]);
             })

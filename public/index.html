@@ -15,6 +15,10 @@
     <script src="scripts/Constants.js"></script>
     <script src="scripts/game-manager.js"></script>
     <script src="scripts/desktop-plane-movement.js"></script>
+    <script src="scripts/element-generator.js"></script>
+    <script src="scripts/ring-obstacle.js"></script>
+    <script src="scripts/plane-collider.js"></script>
+    <script src="scripts/delete-ring.js"></script>
 
     <script>
 
@@ -22,14 +26,37 @@
             init: function () {
                 Context_AF = this;
                 Context_AF.camera = document.querySelector("#camera");
+                Context_AF.plane = document.querySelector("#plane");
                 Context_AF.prevRotationX = Context_AF.camera.object3D.rotation.x;
                 Context_AF.yPosFactor = 0;
+                Context_AF.score = 0;
 
                 //check camera rotation every x seconds and emit an event if the rotation has changed
-                Context_AF.intervalId = setInterval(function() {
-                        const rotation = Context_AF.camera.object3D.rotation.x;
-                        if(Math.abs(Context_AF.prevRotationX - rotation) >= 0.05)
-                        {
+                // Context_AF.intervalId = setInterval(function() {
+                //         const rotation = Context_AF.camera.object3D.rotation.x;
+                //         if(Math.abs(Context_AF.prevRotationX - rotation) >= 0.05)
+                //         {
+                //             Context_AF.prevRotationX = rotation;
+                //             //update the amount the camera y position is being updated each frame
+                //             Context_AF.yPosFactor = (0.05 * Context_AF.prevRotationX);
+                //             const event = new CustomEvent("xRotation", {
+                //                 detail: {
+                //                     planeXRotation: Context_AF.prevRotationX,
+                //                     planeYPosFactor: Context_AF.yPosFactor
+                //                 }
+                //             });
+                //             Context_AF.camera.dispatchEvent(event);
+                //         }
+                //     }, 200)
+
+                    
+                        
+
+                
+            },
+
+            tick: function() {
+                const rotation = Context_AF.camera.object3D.rotation.x;
                             Context_AF.prevRotationX = rotation;
                             //update the amount the camera y position is being updated each frame
                             Context_AF.yPosFactor = (0.05 * Context_AF.prevRotationX);
@@ -40,11 +67,6 @@
                                 }
                             });
                             Context_AF.camera.dispatchEvent(event);
-                        }
-                    }, 200)
-            },
-
-            tick: function() {
                 Context_AF.camera.object3D.position.y = Context_AF.camera.object3D.position.y + Context_AF.yPosFactor;
             },
 
@@ -87,7 +109,7 @@
         <button id="right">Right</button>
     </div>
 
-    <a-scene obb-collider="showColliders: false" id="scene" physics="driver: ammo; debug: false; debugDrawMode: 1;">
+    <a-scene obb-collider="showColliders: true" id="scene" physics="driver: ammo; debug: false; debugDrawMode: 1;">
         <!-- loading in the assets -->
         <a-assets timeOut="10000">
             <!-- <audio id="room_ambience" src="assets/sounds/room-ambience.mp3" preload="auto" crossorigin="anonymous"></audio>
@@ -119,6 +141,7 @@
         </a-entity>
 
         <a-entity id="plane"
+                  obb-collider
                   rotation="-20 -180 0" 
                   position="0 0 0"
                   scale="0.1 0.1 0.1" 
@@ -126,6 +149,16 @@
         </a-entity>
 
         <a-entity game-manager></a-entity>
+        <!-- <a-entity element-generator id="elementGenerator"></a-entity> -->
+
+        <!-- ring removal collider -->
+        <a-entity geometry="primitive: box"
+                  scale="10 10 0.2"
+                  position="0 0 10"
+                  obb-collider
+                  delete-ring>
+
+        </a-entity>
 
         <!-- <a-box class="interactive" id="box" position="0 0 -4" foo color="#FFF"></a-box> -->
 
