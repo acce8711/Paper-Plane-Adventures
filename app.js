@@ -121,25 +121,23 @@ io.on('connection', (socket) => {
     //socket 
     socket.on('x_rotation_update', (data) => {
         // get the id of the player who didn't emit this event
-        const playerIndex = playersData.findIndex(player => player.playerId != socket.id);
-        const playerID = playersData[playerIndex].playerId;
-        console.log("playerID",playerID);
-        io.to(playerID).emit('plane_update', {planeXRotation: data.planeXRotation, planeYPosFactor: data.planeYPosFactor});
-    })
+        if(currGameState === GAME_STATES.playing)
+        {
+            const playerIndex = playersData.findIndex(player => player.playerId != socket.id);
+            const playerID = playersData[playerIndex].playerId;
+            console.log("playerID",playerID);
+            io.to(playerID).emit('plane_update', {mode: currMode, planeXRotation: data.planeXRotation, planeYPosFactor: data.planeYPosFactor});
+        }
+        })
 
     
     socket.on('move_right', (data) => {
-        // console.log("rotation ", data.xRotation)
-        const mainPlayerIndex = playersData.findIndex(player => player.isLeadPlayer);
-        const mainPlayerId = playersData[mainPlayerIndex].playerId;
-        io.to(PLAYING_ROOM).emit('move_towards_point', {destPoint: MAX_HORIZONTAL_DIST, timeUnit: MAX_TIME, mainPlayer: mainPlayerId})
+        io.to(PLAYING_ROOM).emit('move_towards_point', {dir: "right", mode: currMode})
     })
 
 
     socket.on('move_left', (data) => {
-        const mainPlayerIndex = playersData.findIndex(player => player.isLeadPlayer);
-        const mainPlayerId = playersData[mainPlayerIndex].playerId;
-        io.to(PLAYING_ROOM).emit('move_towards_point', {destPoint: MIN_HORIZONTAL_DIST, timeUnit: MAX_TIME, mainPlayer: mainPlayerId})
+        io.to(PLAYING_ROOM).emit('move_towards_point', {dir: "left", mode: currMode})
     })
 
 
@@ -149,9 +147,11 @@ io.on('connection', (socket) => {
 
     //listens for an update in score
     socket.on('score', (data) => {
-        const playerIndex = playersData.findIndex(player => player.playerId != socket.id);
-        const playerID = playersData[playerIndex].playerId;
-        io.to(playerID).emit('score_update', {score: data.score, gameMode: currMode});
+        if(currGameState === GAME_STATES.playing) {
+            const playerIndex = playersData.findIndex(player => player.playerId != socket.id);
+            const playerID = playersData[playerIndex].playerId;
+            io.to(playerID).emit('score_update', {score: data.score, gameMode: currMode});
+        }
     })
     
 

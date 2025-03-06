@@ -24,6 +24,11 @@ AFRAME.registerComponent('game-manager', {
       Context_AF.instructionsUI = document.querySelector('#instructionsUI');
       Context_AF.continueButton = document.querySelector('#continueButton');
       Context_AF.playingUI = document.querySelector('#playingUI');
+      Context_AF.timerUI = document.querySelector('#timer');
+      Context_AF.scoreUI = document.querySelector('#score');
+      Context_AF.opponentScoreUI = document.querySelector('#opponentScore');
+
+
       Context_AF.score = 0;
       Context_AF.opponentScore = 0;
       Context_AF.opponentPlanePos = {x:0, y:0, z:0};
@@ -104,6 +109,7 @@ AFRAME.registerComponent('game-manager', {
                   //desktop camera pos
                   document.querySelector("#camera").object3D.position.set(DESKTOP_CAMERA.x, DESKTOP_CAMERA.y, DESKTOP_CAMERA.z);
                   document.querySelector("#camera").object3D.rotation.x = THREE.MathUtils.degToRad(DESKTOP_CAMERA.xRotation);
+                  document.querySelector("#plane").object3D.position.set(0, 0.6, -3);
                 }
               }
               else if(data.players.length === 0){
@@ -128,6 +134,11 @@ AFRAME.registerComponent('game-manager', {
               document.querySelector("#camera").removeAttribute('modified-look-controls');
               document.querySelector("#camera").removeAttribute('hi');
 
+              document.querySelector("#camera").object3D.position.set(0, 1.6, 0);
+              document.querySelector("#camera").object3D.rotation.x = THREE.MathUtils.degToRad(0);
+              document.querySelector("#plane").object3D.parent = document.querySelector("#camera").object3D;
+              document.querySelector("#plane").object3D.position.set(0, -1, -3)
+
 
               displayUI([Context_AF.waitingUI]);
             })
@@ -137,7 +148,11 @@ AFRAME.registerComponent('game-manager', {
               console.log("Plyaer id: ", Context_AF.playerId, " lead player id: ", data)
               console.log(Context_AF.playerId === data ? "I am selecting the mode" : "I am waiting for the mode to be selected")
               //hide the currently displayed UI and display the mode selection UI
-              displayUI([Context_AF.modeSelectionUI, Context_AF.modeSelectionButtons]);
+              const uiToDisplay = [Context_AF.modeSelectionUI];
+              if(Context_AF.isLeadPlayer)
+                uiToDisplay.push(Context_AF.modeSelectionButtons);
+              displayUI(uiToDisplay);
+             
             })
 
             //listens for when the instructions are ready to be displayed
@@ -151,41 +166,48 @@ AFRAME.registerComponent('game-manager', {
             socket.on('playing', (data) => {
               console.log("playing in mode: ", data.mode, " time left: ", data.timeLeft);
               //hide the currently displayed UI and display the playing UI
-              displayUI([Context_AF.playingUI]);
-
+              
+              const uiToDisplay = [Context_AF.playingUI];
               if(data.mode === 'competitive'){
                 document.querySelector("#plane").setAttribute('plane-collider', {});
+                document.querySelector("#plane").setAttribute('obb-collider', {});
+                uiToDisplay.push(Context_AF.opponentScoreUI)
               }
               else if (data.mode === "collaborative" && Context_AF.isLeadPlayer) {
                 console.log("assigning plane collider to lead player")
                 document.querySelector("#plane").setAttribute('plane-collider', {});
+                document.querySelector("#plane").setAttribute('obb-collider', {});
               }
-                
-              //add ghost oponent plane for competitive mode
+              displayUI(uiToDisplay);
+
+              //add ghost component plane for competitive mode
               if(data.mode === "competitive"){
                 const planeEl = document.createElement("a-entity");
                 planeEl.id = "opponentPlane";
+                planeEl.object3D.position.set(0, 0.6, -3)
                 planeEl.object3D.rotation.x = THREE.MathUtils.degToRad(-20);
-                planeEl.object3D.rotation.x = THREE.MathUtils.degToRad(-180);
+                planeEl.object3D.rotation.y = THREE.MathUtils.degToRad(-180);
                 planeEl.object3D.scale.set(0.1, 0.1, 0.1);
                 planeEl.setAttribute('gltf-model', '#paper_plane')
+                planeEl.setAttribute('plane-movement', {})
         
-                planeEl.setAttribute('ring-plane', {});
-                planeEl.setAttribute('obb-collider', {});
-                planeEl.object3D.position.set(Math.floor(Math.random() * 10 - 5), 0, -50)
+                // planeEl.setAttribute('ring-plane', {});
+                // planeEl.setAttribute('obb-collider', {});
+                // planeEl.object3D.position.set(Math.floor(Math.random() * 10 - 5), 0, -50)
                 Context_AF.scene.appendChild(planeEl);
               }
+              
 
 
 
               if(Context_AF.isLeadPlayer) {
                 document.querySelector("#camera").setAttribute('modified-look-controls', {});
                 document.querySelector("#camera").setAttribute('hi', {});
-                document.querySelector("#horizontalControl").style.display = SHOW_UI;
-                document.querySelector("#horizontalControl").classList.add("activeUI");
               }
               else {
-                document.querySelector("#plane").setAttribute('desktop-plane-movement', {});
+                document.querySelector("#plane").setAttribute('plane-movement', {});
+                document.querySelector("#horizontalControl").style.display = SHOW_UI;
+                document.querySelector("#horizontalControl").classList.add("activeUI");
               }
 
               // if(data.mode === "competitive") {
@@ -217,11 +239,14 @@ AFRAME.registerComponent('game-manager', {
 
             //listens for the changes in the plane position
             socket.on('plane_update', (data) => {
-              console.log("looks like i got an update")
-              const manager = document.querySelector('[desktop-plane-movement]').components['desktop-plane-movement'];
-              console.log(manager);
-              manager.changeState("yPosFactor", data.planeYPosFactor);
-              manager.changeState("planeXRotation", (data.planeXRotation)*(-1));
+              if(data.mode === "collaborative") {
+                console.log("looks like i got an update collab")
+                planeYPosUpdate('#plane', data.planeYPosFactor, data.planeXRotation)
+              }
+              else {
+                planeYPosUpdate('#opponentPlane', data.planeYPosFactor, data.planeXRotation)
+              }
+              
               //document.querySelector("#camera").object3D.position.y = data.planeYPos;
 
               // if(data.mode === "competitive"){
@@ -241,15 +266,31 @@ AFRAME.registerComponent('game-manager', {
               //                                                             enabled: true 
               // });
               Context_AF.horizontalMovement = true;
+
+              let objectName = "#plane";
+              if(Context_AF.isLeadPlayer){
+                objectName = data.mode === "competitive" ? '#opponentPlane' : '#camera';
+                console.log("obj name", objectName)
+              }
+                
               const moveX = setInterval(function() {
-                const objectName = data.mainPlayer === Context_AF.playerId ? "#camera" : "#plane";
+                
                 console.log("My obj", objectName)
                 const currPosX = document.querySelector(objectName).object3D.position.x;
                 console.log("hor mov: ", Context_AF.horizontalMovement);
-                if(currPosX < 8 && currPosX > -8)
-                  document.querySelector(objectName).object3D.position.x += 0.05;
-                if(currPosX >= 8 || currPosX <= -8 || !Context_AF.horizontalMovement)
+                if(currPosX <= 8 && currPosX >= -8)
+                  if(data.dir === "left")
+                    document.querySelector(objectName).object3D.position.x -= 0.05;
+                  else if(data.dir === "right")
+                    document.querySelector(objectName).object3D.position.x += 0.05;
+                if(currPosX > 8 || currPosX < -8 || !Context_AF.horizontalMovement) {
                   clearInterval(moveX);  
+                  if(data.dir === "left")
+                    document.querySelector(objectName).object3D.position.x += 0.05;
+                  else if(data.dir === "right")
+                    document.querySelector(objectName).object3D.position.x -= 0.05;
+                }
+                  
             }, 16.7)
             })
 
@@ -260,14 +301,18 @@ AFRAME.registerComponent('game-manager', {
 
             //listens for when the score has been updated
             socket.on('score_update', (data) => {
+              
+
               if(data.gameMode === 'competitive'){
                 Context_AF.opponentScore = data.score;
                 console.log("comp score: ", Context_AF.opponentScore);
+                Context_AF.opponentScoreUI.innerText = `opponent score: ${Context_AF.opponentScore}`
               }
               else {
                 Context_AF.score = data.score;
                 console.log("collab score: ", Context_AF.score);
               }
+              Context_AF.scoreUI.innerText = `score: ${Context_AF.score}`;
               //console.log("score: ", data);
             })
             
@@ -282,10 +327,11 @@ AFRAME.registerComponent('game-manager', {
               //console.log("Plyaer id: ", Context_AF.playerId, " lead player id: ", data)
               //console.log(Context_AF.playerId === data ? "I am selecting the mode" : "I am waiting for the mode to be selected")
               document.querySelector("#plane").removeAttribute('plane-collider');
+              document.querySelector("#plane").removeAttribute('plane-movement');
+              document.querySelector("#opponentPlane").removeAttribute('plane-movement');
               document.querySelector("#plane").removeAttribute('obb-collider');
               document.querySelector("#camera").removeAttribute('modified-look-controls');
               document.querySelector("#camera").removeAttribute('hi');
-              document.querySelector("#plane").removeAttribute('desktop-plane-movement');
               document.querySelector("#elementGenerator").removeAttribute('element-generator');
               
               
@@ -324,3 +370,10 @@ const mobileScene = function() {
 
 }
 
+function planeYPosUpdate (planeID, positionFactor, xRotation) {
+  console.log("looks like i got a collab yPos update")
+  console.log("element name: ", planeID, document.querySelector(planeID))
+  document.querySelector(planeID).setAttribute('plane-movement', {yPosFactor: positionFactor,
+                                                                  xRotation: (xRotation)*(-1)
+  })
+}
