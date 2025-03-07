@@ -10,7 +10,7 @@ AFRAME.registerComponent('clouds', {
 
     tick: function() {
       //add check to see if rotation and pos is different
-      this.el.object3D.position.z += 0.1;
+      this.el.object3D.position.z += 0.35;
     }
   });
   

@@ -3,21 +3,61 @@ AFRAME.registerComponent('cloud-generator', {
     init: function () {
         const Context_AF = this;
         Context_AF.scene = document.querySelector("a-scene");
-        const cloudsEl = document.createElement('a-entity');
-        cloudsEl.setAttribute('gltf-model', '#cloud_1_gltf');
-        cloudsEl.setAttribute('obb-collider', {});
-        cloudsEl.setAttribute('clouds', {});
-        cloudsEl.object3D.position.set(0, -7, 0);
-        Context_AF.scene.appendChild(cloudsEl);
 
-        // const moveX = setInterval(function() {
-        //     console.log("hello")
-        //     const cloudsEl = document.createElement('a-entity');
-        //     cloudsEl.setAttribute('gltf-model', '#cloud_1_gltf');
-        //     cloudsEl.setAttribute('obb-collider', {});
-        //     cloudsEl.setAttribute('clouds', {});
-        //     cloudsEl.object3D.position.set(0, -7, -130);
-        //     Context_AF.scene.appendChild(cloudsEl);
-        // }, 5000)
+        // const cloudsGrp = document.createElement('a-entity');
+        // cloudsGrp.object3D.position.set(0, -7, -120);
+        // cloudsGrp.setAttribute('clouds', {});
+
+        // const cloudCollider = document.createElement('a-entity');
+        // cloudCollider.setAttribute('obb-collider', {size: '0.5 0.5 0.5'});
+        // cloudCollider.object3D.position.set(0, 0, -60);
+        // cloudCollider.className = "clouds";
+
+        // const cloudsEl = document.createElement('a-entity');
+        // cloudsEl.setAttribute('gltf-model', '#cloud_1_gltf');
+
+        // const cloudsGrp1 = document.createElement('a-entity');
+        // cloudsGrp1.object3D.position.set(0, -7, -240);
+        // cloudsGrp1.setAttribute('clouds', {});
+
+        // const cloudCollider1 = document.createElement('a-entity');
+        // cloudCollider1.setAttribute('obb-collider', {size: '0.5 0.5 0.5'});
+        // cloudCollider1.object3D.position.set(0, 0, -60);
+        // cloudCollider1.className = "clouds";
+
+        // const cloudsEl1 = document.createElement('a-entity');
+        // cloudsEl1.setAttribute('gltf-model', '#cloud_1_gltf');
+        
+        
+
+        // cloudsGrp.append(cloudsEl, cloudCollider)
+        // Context_AF.scene.appendChild(cloudsGrp);
+
+        // cloudsGrp1.append(cloudsEl1, cloudCollider1)
+        // Context_AF.scene.appendChild(cloudsGrp1);
+
+        this.obbCo = setInterval(function() {
+            console.log("creating cloud")
+            const cloudsGrp2 = document.createElement('a-entity');
+            cloudsGrp2.object3D.position.set(0, -7, -120);
+            cloudsGrp2.setAttribute('clouds', {});
+
+            const cloudCollider2 = document.createElement('a-entity');
+            cloudCollider2.setAttribute('obb-collider', {size: '0.5 0.5 0.5'});
+            cloudCollider2.object3D.position.set(0, 0, -60);
+            cloudCollider2.className = "clouds";
+
+            const cloudsEl2 = document.createElement('a-entity');
+            cloudsEl2.setAttribute('gltf-model', '#cloud_1_gltf');
+
+
+            cloudsGrp2.append(cloudsEl2, cloudCollider2)
+            Context_AF.scene.appendChild(cloudsGrp2);
+        }, 5500)
     },
+
+    remove: function() {
+        console.log("function removebdsvfhgvshgfd")
+        clearInterval(this.obbCo);
+    }
 });

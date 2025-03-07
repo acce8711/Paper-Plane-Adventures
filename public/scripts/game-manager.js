@@ -15,6 +15,8 @@ AFRAME.registerComponent('game-manager', {
       Context_AF.mode = "";
       Context_AF.horizontalMovement = false;
       Context_AF.scene = document.querySelector("a-scene");
+      Context_AF.particlesRightSide = document.querySelector("#particlesRightSide");
+      Context_AF.particlesLeftSide = document.querySelector("#particlesLeftSide");
 
       //UI variables
       Context_AF.waitingUI = document.querySelector('#waitingUI');
@@ -29,6 +31,8 @@ AFRAME.registerComponent('game-manager', {
       Context_AF.scoreUI = document.querySelector('#score');
       Context_AF.opponentScoreUI = document.querySelector('#opponentScore');
       Context_AF.horizontalControlsUI = document.querySelector('#horizontalControl')
+
+
 
 
       Context_AF.score = 0;
@@ -67,22 +71,27 @@ AFRAME.registerComponent('game-manager', {
                 //add event listener to listen for right control
                 document.querySelector("#right").addEventListener('mousedown', function() {
                   socket.emit('move_right');
+                  Context_AF.particlesLeftSide.setAttribute('particle-system', {enabled: true});
                 })
 
                 //add event listener to listen for stopping right control
                 document.querySelector("#right").addEventListener('mouseup', function() {
                   console.log("stop ht wbhdhjdhsgdvs")
                   socket.emit('stop_horizontal_movement');
+                  Context_AF.particlesLeftSide.setAttribute('particle-system', {enabled: false});
                 })
 
                 //add event listener to listen for right control
                 document.querySelector("#left").addEventListener('mousedown', function() {
                   socket.emit('move_left');
+                  
+                  Context_AF.particlesRightSide.setAttribute('particle-system', {enabled: true});
                 })
 
                 //add event listener to listen for stopping right control
                 document.querySelector("#left").addEventListener('mouseup', function() {
                   socket.emit('stop_horizontal_movement');
+                  Context_AF.particlesRightSide.setAttribute('particle-system', {enabled: false});
                 })
 
                 //add event listener for score update
@@ -140,6 +149,12 @@ AFRAME.registerComponent('game-manager', {
               document.querySelector("#camera").removeAttribute('modified-look-controls');
               document.querySelector("#camera").removeAttribute('hi');
 
+              document.querySelector('#game').removeAttribute('cloud-generator')
+
+              Context_AF.particlesRightSide.setAttribute('particle-system', {enabled: false});
+              Context_AF.particlesLeftSide.setAttribute('particle-system', {enabled: false});
+
+
               document.querySelector("#camera").object3D.position.set(0, 1.6, 0);
               document.querySelector("#camera").object3D.rotation.x = THREE.MathUtils.degToRad(0);
               document.querySelector("#plane").object3D.parent = document.querySelector("#camera").object3D;
@@ -177,6 +192,7 @@ AFRAME.registerComponent('game-manager', {
               Context_AF.timerUI.innerText = `Time Left: ${data.timeLeft}`;
               Context_AF.scoreUI.innerText = `Score: ${Context_AF.score}`;
               Context_AF.opponentScoreUI.innerText = `Opponent score: ${Context_AF.opponentScore}`;
+              document.querySelector('#game').setAttribute('cloud-generator', {})
               const uiToDisplay = [Context_AF.playingUI];
               if(data.mode === 'competitive'){
                 document.querySelector("#plane").setAttribute('plane-collider', {});
@@ -237,7 +253,7 @@ AFRAME.registerComponent('game-manager', {
               const obstacleEl = document.createElement("a-ring");
               obstacleEl.setAttribute('ring-obstacle', {});
               obstacleEl.setAttribute('obb-collider', {});
-              ghostObstacleEl.className = 'collider'
+              obstacleEl.className = 'collider'
 
               //display ghost and current player obstacles if this is competitive mode
               if(Context_AF.mode === "competitive") {
@@ -357,11 +373,15 @@ AFRAME.registerComponent('game-manager', {
               document.querySelector("#plane").removeAttribute('plane-collider');
               document.querySelector("#plane").removeAttribute('plane-movement');
               document.querySelector("#plane").removeAttribute('plane-movement');
-              document.querySelector("#opponentPlane").removeAttribute('plane-movement');
+              
+             document.querySelector('#game').removeAttribute('cloud-generator')
 
               document.querySelector("#plane").removeAttribute('obb-collider');
               document.querySelector("#camera").removeAttribute('modified-look-controls');
               document.querySelector("#camera").removeAttribute('hi');
+
+              if(Context_AF.mode === "competitive")
+                document.querySelector("#opponentPlane").removeAttribute('plane-movement');
 
               //reset game logic
               Context_AF.score = 0
@@ -369,6 +389,9 @@ AFRAME.registerComponent('game-manager', {
               if(!Context_AF.isLeadPlayer)
                 document.querySelector('#plane').object3D.position.set(0, 0.6, -3);
               document.querySelector('#camera').object3D.position.set(0, 1.6, 0);
+
+              Context_AF.particlesRightSide.setAttribute('particle-system', {enabled: false});
+              Context_AF.particlesLeftSide.setAttribute('particle-system', {enabled: false});
               
               
               console.log("total score ", Context_AF.score);

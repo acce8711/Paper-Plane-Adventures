@@ -7,7 +7,7 @@ AFRAME.registerComponent('plane-collider', {
       const Context_AF = this;
       Context_AF.collideHandler = function(e) {
         //dispatch event if the plane collides with a non-ghost obstacle
-        if(e.detail.withEl.className === "ghostCollider") {
+        if(e.detail.withEl.className !== "ghostCollider") {
           const event = new CustomEvent("scoreUpdate");
           Context_AF.el.dispatchEvent(event);
         }
