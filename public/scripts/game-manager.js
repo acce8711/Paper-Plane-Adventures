@@ -12,6 +12,7 @@ AFRAME.registerComponent('game-manager', {
       Context_AF.device = AFRAME.utils.device.isMobile() ? DEVICES.mobile : DEVICES.desktop;
       Context_AF.playerId = "";
       Context_AF.isLeadPlayer = false;
+      Context_AF.mode = "";
       Context_AF.horizontalMovement = false;
       Context_AF.scene = document.querySelector("a-scene");
 
@@ -27,6 +28,7 @@ AFRAME.registerComponent('game-manager', {
       Context_AF.timerUI = document.querySelector('#timer');
       Context_AF.scoreUI = document.querySelector('#score');
       Context_AF.opponentScoreUI = document.querySelector('#opponentScore');
+      Context_AF.horizontalControlsUI = document.querySelector('#horizontalControl')
 
 
       Context_AF.score = 0;
@@ -40,11 +42,13 @@ AFRAME.registerComponent('game-manager', {
             socket.on('connect', (userData) => {
                 //add an event listener for the competitive mode button that listens if a competitive mode has been selected
                 Context_AF.competitiveModeButton.addEventListener('click', function(){
+                    Context_AF.mode = 'competitive';
                     socket.emit('mode_selected', 'competitive');
                 });
 
                 //add an event listener for the collaborative mode button that listens if a collaborative mode has been selected
                 Context_AF.collaborativeModeButton.addEventListener('click', function(){
+                  Context_AF.mode = 'collaborative';
                   socket.emit('mode_selected', 'collaborative');
                 });
 
@@ -84,6 +88,7 @@ AFRAME.registerComponent('game-manager', {
                 //add event listener for score update
                 document.querySelector('#plane').addEventListener('scoreUpdate', function() {
                   Context_AF.score += 1;
+                  Context_AF.scoreUI.innerText = `score: ${Context_AF.score}`;
                   socket.emit('score', {score: Context_AF.score});
                 })
             });
@@ -109,7 +114,7 @@ AFRAME.registerComponent('game-manager', {
                   //desktop camera pos
                   document.querySelector("#camera").object3D.position.set(DESKTOP_CAMERA.x, DESKTOP_CAMERA.y, DESKTOP_CAMERA.z);
                   document.querySelector("#camera").object3D.rotation.x = THREE.MathUtils.degToRad(DESKTOP_CAMERA.xRotation);
-                  document.querySelector("#plane").object3D.position.set(0, 0.6, -3);
+                  document.querySelector("#plane").object3D.position.set(0, 0.6, -1.9);
                 }
               }
               else if(data.players.length === 0){
@@ -120,7 +125,7 @@ AFRAME.registerComponent('game-manager', {
 
                 //mobile camera pos
                 document.querySelector("#plane").object3D.parent = document.querySelector("#camera").object3D;
-                document.querySelector("#plane").object3D.position.set(0, -1, -3)
+                document.querySelector("#plane").object3D.position.set(0, -1, -1.9)
               }
             });
 
@@ -128,6 +133,7 @@ AFRAME.registerComponent('game-manager', {
             socket.on('waiting', (data) => {
               console.log("Plyaer id: ", Context_AF.playerId, " lead player id: ", data)
               Context_AF.isLeadPlayer = data === Context_AF.playerId;
+              Context_AF.mode = "";
               console.log(Context_AF.playerId === data ? "I am the lead player" : "I am not the lead player")
               //hide the currently displayed UI and display the waiting UI
 
@@ -137,7 +143,7 @@ AFRAME.registerComponent('game-manager', {
               document.querySelector("#camera").object3D.position.set(0, 1.6, 0);
               document.querySelector("#camera").object3D.rotation.x = THREE.MathUtils.degToRad(0);
               document.querySelector("#plane").object3D.parent = document.querySelector("#camera").object3D;
-              document.querySelector("#plane").object3D.position.set(0, -1, -3)
+              document.querySelector("#plane").object3D.position.set(0, -1, -1.9)
 
 
               displayUI([Context_AF.waitingUI]);
@@ -157,6 +163,7 @@ AFRAME.registerComponent('game-manager', {
 
             //listens for when the instructions are ready to be displayed
             socket.on('instructions', (data) => {
+              Context_AF.mode = data.mode;
               console.log("instructions for mode are being displayed: ", data);
               //hide the currently displayed UI and display the instructions UI
               displayUI([Context_AF.instructionsUI]);
@@ -167,6 +174,9 @@ AFRAME.registerComponent('game-manager', {
               console.log("playing in mode: ", data.mode, " time left: ", data.timeLeft);
               //hide the currently displayed UI and display the playing UI
               
+              Context_AF.timerUI.innerText = `Time Left: ${data.timeLeft}`;
+              Context_AF.scoreUI.innerText = `Score: ${Context_AF.score}`;
+              Context_AF.opponentScoreUI.innerText = `Opponent score: ${Context_AF.opponentScore}`;
               const uiToDisplay = [Context_AF.playingUI];
               if(data.mode === 'competitive'){
                 document.querySelector("#plane").setAttribute('plane-collider', {});
@@ -178,7 +188,6 @@ AFRAME.registerComponent('game-manager', {
                 document.querySelector("#plane").setAttribute('plane-collider', {});
                 document.querySelector("#plane").setAttribute('obb-collider', {});
               }
-              displayUI(uiToDisplay);
 
               //add ghost component plane for competitive mode
               if(data.mode === "competitive"){
@@ -188,17 +197,14 @@ AFRAME.registerComponent('game-manager', {
                 planeEl.object3D.rotation.x = THREE.MathUtils.degToRad(-20);
                 planeEl.object3D.rotation.y = THREE.MathUtils.degToRad(-180);
                 planeEl.object3D.scale.set(0.1, 0.1, 0.1);
-                planeEl.setAttribute('gltf-model', '#paper_plane')
-                planeEl.setAttribute('plane-movement', {})
+                planeEl.setAttribute('gltf-model', '#paper_plane');
+                planeEl.setAttribute('plane-movement', {});
         
                 // planeEl.setAttribute('ring-plane', {});
                 // planeEl.setAttribute('obb-collider', {});
                 // planeEl.object3D.position.set(Math.floor(Math.random() * 10 - 5), 0, -50)
                 Context_AF.scene.appendChild(planeEl);
               }
-              
-
-
 
               if(Context_AF.isLeadPlayer) {
                 document.querySelector("#camera").setAttribute('modified-look-controls', {});
@@ -206,9 +212,10 @@ AFRAME.registerComponent('game-manager', {
               }
               else {
                 document.querySelector("#plane").setAttribute('plane-movement', {});
-                document.querySelector("#horizontalControl").style.display = SHOW_UI;
-                document.querySelector("#horizontalControl").classList.add("activeUI");
+                uiToDisplay.push(Context_AF.horizontalControlsUI);
               }
+
+              displayUI(uiToDisplay);
 
               // if(data.mode === "competitive") {
               //   //create an instance of a ghost plane
@@ -225,15 +232,35 @@ AFRAME.registerComponent('game-manager', {
               // }
             })
 
-            
-
             //listens for when to generate an obstacle
             socket.on('generate_obstacle', (data) => {
-              console.log("generate obstacle")
               const obstacleEl = document.createElement("a-ring");
               obstacleEl.setAttribute('ring-obstacle', {});
               obstacleEl.setAttribute('obb-collider', {});
-              obstacleEl.object3D.position.set(data.x, data.y, data.z);
+              ghostObstacleEl.className = 'collider'
+
+              //display ghost and current player obstacles if this is competitive mode
+              if(Context_AF.mode === "competitive") {
+                const ghostObstacleEl = document.createElement("a-ring");
+                ghostObstacleEl.setAttribute('ring-obstacle', {});
+                ghostObstacleEl.setAttribute('obb-collider', {});
+                ghostObstacleEl.setAttribute('material', {color: '#000000'});
+                ghostObstacleEl.className = 'ghostCollider'
+                if(Context_AF.isLeadPlayer){
+                  obstacleEl.object3D.position.set(data.leadPlayerObstacles.x, data.leadPlayerObstacles.y, data.leadPlayerObstacles.z);
+                  ghostObstacleEl.object3D.position.set(data.nonLeadPlayerObstacles.x, data.nonLeadPlayerObstacles.y, data.nonLeadPlayerObstacles.z);
+                }
+                else {
+                  obstacleEl.object3D.position.set(data.nonLeadPlayerObstacles.x, data.nonLeadPlayerObstacles.y, data.nonLeadPlayerObstacles.z);
+                  ghostObstacleEl.object3D.position.set(data.leadPlayerObstacles.x, data.leadPlayerObstacles.y, data.leadPlayerObstacles.z);
+                }
+                Context_AF.scene.appendChild(ghostObstacleEl);
+              }
+              else {
+                obstacleEl.object3D.position.set(data.x, data.y, data.z);
+              }
+              
+              
               Context_AF.scene.appendChild(obstacleEl);
             })
 
@@ -318,7 +345,8 @@ AFRAME.registerComponent('game-manager', {
             
             //listens for when the game timer has been updated
             socket.on('time_update', (data) => {
-              console.log("curr time left: ", data.timeLeft);
+              console.log("time: ", data.timeLeft)
+              Context_AF.timerUI.innerText = `Time left: ${data.timeLeft}`;
             })
 
             //listens for when the game has ended
@@ -328,11 +356,19 @@ AFRAME.registerComponent('game-manager', {
               //console.log(Context_AF.playerId === data ? "I am selecting the mode" : "I am waiting for the mode to be selected")
               document.querySelector("#plane").removeAttribute('plane-collider');
               document.querySelector("#plane").removeAttribute('plane-movement');
+              document.querySelector("#plane").removeAttribute('plane-movement');
               document.querySelector("#opponentPlane").removeAttribute('plane-movement');
+
               document.querySelector("#plane").removeAttribute('obb-collider');
               document.querySelector("#camera").removeAttribute('modified-look-controls');
               document.querySelector("#camera").removeAttribute('hi');
-              document.querySelector("#elementGenerator").removeAttribute('element-generator');
+
+              //reset game logic
+              Context_AF.score = 0
+              Context_AF.opponentScore = 0
+              if(!Context_AF.isLeadPlayer)
+                document.querySelector('#plane').object3D.position.set(0, 0.6, -3);
+              document.querySelector('#camera').object3D.position.set(0, 1.6, 0);
               
               
               console.log("total score ", Context_AF.score);

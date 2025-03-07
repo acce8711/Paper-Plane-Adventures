@@ -6,9 +6,9 @@ const DEVICES = {
 
 const DESKTOP_CAMERA = {
     x: 0,
-    y: 8,
-    z: 8,
-    xRotation: -36
+    y: 3,
+    z: 3,
+    xRotation: -15
 }
 
 const EMPTY_ID = "";

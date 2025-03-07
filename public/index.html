@@ -20,6 +20,8 @@
     <script src="scripts/plane-collider.js"></script>
     <script src="scripts/delete-ring.js"></script>
     <script src="scripts/plane-movement.js"></script>
+    <script src="scripts/cloud-generator.js"></script>
+    <script src="scripts/clouds.js"></script>
 
     <script>
 
@@ -106,17 +108,20 @@
         <p id="timer">Timer: </p>
         <p id="score">Score:</p>
         <p id="opponentScore" style="display: none;">My score: </p>
+        <div id="horizontalControl" class="ui-elements" style="display: none;">
+            <button id="left">Left</button>
+            <button id="right">Right</button>
+        </div>
         </div>
     </div>
 
-    <div id="horizontalControl" class="ui-elements" style="display: none;">
-        <button id="left">Left</button>
-        <button id="right">Right</button>
-    </div>
 
-    <a-scene obb-collider="showColliders: true" id="scene" physics="driver: ammo; debug: false; debugDrawMode: 1;">
+    
+
+    <a-scene  id="scene" physics="driver: ammo; debug: false; debugDrawMode: 1;">
         <!-- loading in the assets -->
         <a-assets timeOut="10000">
+            <img id="sky_img" src="assets/textures/sky.png" crossorigin="anonymous">
             <!-- <audio id="room_ambience" src="assets/sounds/room-ambience.mp3" preload="auto" crossorigin="anonymous"></audio>
             <audio id="clay_place" src="assets/sounds/clay-slap.mp3" preload="auto" crossorigin="anonymous"></audio>
             <audio id="button_sound" src="assets/sounds/button-press.mp3" preload="auto" crossorigin="anonymous"></audio>
@@ -127,15 +132,22 @@
             <a-asset-item id="scene_model" response-type="arraybuffer" src="assets/models/furniture.glb"></a-asset-item>
             <a-asset-item id="clay_model" response-type="arraybuffer" src="assets/models/clay.glb"></a-asset-item>-->
             <a-asset-item id="paper_plane" response-type="arraybuffer" src="assets/models/paper_plane.glb"></a-asset-item> 
+            <a-asset-item id="cloud_1_gltf" response-type="arraybuffer" src="assets/models/cloud_1.glb"></a-asset-item> 
         </a-assets>
 
-        <a-entity environment="preset: default"></a-entity>
+        <!-- <a-entity environment="fog: 0.85; ground:none; skyType:gradient; horizonColor:
+        #ffb37d
+        ; skyColor:#c000f5"></a-entity>
 
-        
+        <a-entity geometry="primitive: sphere; radius: 40;"
+                  material="shader: flat; side: back; src:#sky_img; "></a-entity> -->
+                  <a-sky src="#sky_img"></a-sky>
+        <a-entity light="type:directional; color:#ffdd80; intensity: 0.8"
+                  position="-0.5 1 1"></a-entity>
+        <a-entity light="type:ambient; color:#fbc5fc; intensity: 0.8"></a-entity>
 
         <!-- camera -->
-        <a-entity 
-                  id="camera" 
+        <a-entity id="camera" 
                   camera
                   wasd-controls
                   position="0 1.6 0">
@@ -152,7 +164,7 @@
                   gltf-model="#paper_plane">
         </a-entity>
 
-        <a-entity game-manager></a-entity>
+        <a-entity game-manager cloud-generator></a-entity>
         <!-- <a-entity element-generator id="elementGenerator"></a-entity> -->
 
         <!-- ring removal collider -->

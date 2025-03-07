@@ -29,7 +29,7 @@ const PLAYING_ROOM = "playingRoom";
 const playersData = [];
 let currGameState = GAME_STATES.waiting;
 let currMode = "";
-let timeLeft = 100;
+let timeLeft = 20;
 let planeYPos = 1.6;
 
 
@@ -179,11 +179,11 @@ const emitGameStateEvents = function() {
             break;
         //emit the instructions event with the selected mode
         case GAME_STATES.instructions:
-            io.to(PLAYING_ROOM).emit("instructions", currMode);
+            io.to(PLAYING_ROOM).emit("instructions", {mode: currMode});
             break;
         //emit the playing event with the selected mode
         case GAME_STATES.playing:
-            io.to(PLAYING_ROOM).emit("playing", {mode: currMode});
+            io.to(PLAYING_ROOM).emit("playing", {mode: currMode, timeLeft: 20});
             //code reference: https://stackoverflow.com/questions/29311311/how-do-i-take-away-from-a-variable-a-certain-number-of-times-every-second-javasc/29311357
             let secondsPassed = 0;
             const intervalId = setInterval(function() {
@@ -192,7 +192,7 @@ const emitGameStateEvents = function() {
                     console.log(timeLeft);
                     if(timeLeft === 0) {
                         clearInterval(intervalId);
-                        timeLeft = 100;
+                        timeLeft = 20;
                         currGameState = GAME_STATES.gameEnd;
                         emitGameStateEvents();
                     }
@@ -200,7 +200,7 @@ const emitGameStateEvents = function() {
                     {
                         console.log("game stopped due to playier leaving")
                         clearInterval(intervalId);
-                        timeLeft = 100;
+                        timeLeft = 20;
                     }
                     else {
                         timeLeft--;
@@ -211,7 +211,12 @@ const emitGameStateEvents = function() {
                     if(secondsPassed === 5)
                     {
                         secondsPassed = 0;
-                        io.to(PLAYING_ROOM).emit('generate_obstacle', {x: Math.floor(Math.random() * 10 - 5), y:0, z:-50})
+                        if(currMode === "competitive")
+                            io.to(PLAYING_ROOM).emit('generate_obstacle', {leadPlayerObstacles: {x:0, y:Math.floor(Math.random() * 10 - 5), z:-50},
+                                                                           nonLeadPlayerObstacles: {x: Math.floor(Math.random() * 10 - 5), y:0, z:-50}
+                        })
+                        else
+                            io.to(PLAYING_ROOM).emit('generate_obstacle', {x: Math.floor(Math.random() * 10 - 5), y:Math.floor(Math.random() * 10 - 5), z:-50})
                     }
 
                 }, 1000)
