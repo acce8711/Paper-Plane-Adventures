@@ -15,8 +15,8 @@ AFRAME.registerComponent('game-manager', {
       Context_AF.mode = "";
       Context_AF.horizontalMovement = false;
       Context_AF.scene = document.querySelector("a-scene");
-      Context_AF.particlesRightSide = document.querySelector("#particlesRightSide");
-      Context_AF.particlesLeftSide = document.querySelector("#particlesLeftSide");
+      // Context_AF.particlesRightSide = document.querySelector("#particlesRightSide");
+      // Context_AF.particlesLeftSide = document.querySelector("#particlesLeftSide");
 
       //UI variables
       Context_AF.lobbyUI = document.querySelector('#lobbyMessage');
@@ -95,43 +95,47 @@ AFRAME.registerComponent('game-manager', {
                 //add event listener to listen for right control
                 document.querySelector("#right").addEventListener('mousedown', function() {
                   socket.emit('move_right');
-                  Context_AF.particlesLeftSide.setAttribute('particle-system', {enabled: true});
+                  // Context_AF.particlesLeftSide.setAttribute('particle-system', {enabled: true});
                 })
 
                 //add event listener to listen for stopping right control
                 document.querySelector("#right").addEventListener('mouseup', function() {
                   socket.emit('stop_horizontal_movement');
-                  Context_AF.particlesLeftSide.setAttribute('particle-system', {enabled: false});
+                  // Context_AF.particlesLeftSide.setAttribute('particle-system', {enabled: false});
                 })
 
                 //add event listener to listen for stopping right control
                 document.querySelector("#right").addEventListener('mouseleave', function() {
                   socket.emit('stop_horizontal_movement');
-                  Context_AF.particlesLeftSide.setAttribute('particle-system', {enabled: false});
+                  // Context_AF.particlesLeftSide.setAttribute('particle-system', {enabled: false});
                 })
 
                 //add event listener to listen for right control
                 document.querySelector("#left").addEventListener('mousedown', function() {
                   socket.emit('move_left');
                   
-                  Context_AF.particlesRightSide.setAttribute('particle-system', {enabled: true});
+                  // Context_AF.particlesRightSide.setAttribute('particle-system', {enabled: true});
                 })
 
                 //add event listener to listen for stopping right control
                 document.querySelector("#left").addEventListener('mouseup', function() {
                   socket.emit('stop_horizontal_movement');
-                  Context_AF.particlesRightSide.setAttribute('particle-system', {enabled: false});
+                  // Context_AF.particlesRightSide.setAttribute('particle-system', {enabled: false});
                 })
 
                 //add event listener to listen for stopping right control
                 document.querySelector("#left").addEventListener('mouseleave', function() {
                   socket.emit('stop_horizontal_movement');
-                  Context_AF.particlesRightSide.setAttribute('particle-system', {enabled: false});
+                  // Context_AF.particlesRightSide.setAttribute('particle-system', {enabled: false});
                 })
 
                 //add event listener for score update
                 document.querySelector('#plane').addEventListener('scoreUpdate', function() {
                   Context_AF.score += 1;
+                  console.log("score collision")
+                  //stop sound
+                  const ambientSound = document.querySelector('[sound__chime]');
+                  ambientSound.components.sound__chime.playSound();
                   Context_AF.scorePlaceholder.innerText = Context_AF.score;
                   socket.emit('score', {score: Context_AF.score});
                 })
@@ -186,13 +190,17 @@ AFRAME.registerComponent('game-manager', {
               Context_AF.isLeadPlayer = data === Context_AF.playerId;
               Context_AF.mode = "";
 
+              //stop sound
+              const ambientSound = document.querySelector('[sound__ambient]');
+              ambientSound.components.sound__ambient.stopSound();
+
               document.querySelector("#camera").removeAttribute('modified-look-controls');
               document.querySelector("#camera").removeAttribute('hi');
 
               document.querySelector('#game').removeAttribute('cloud-generator')
 
-              Context_AF.particlesRightSide.setAttribute('particle-system', {enabled: false});
-              Context_AF.particlesLeftSide.setAttribute('particle-system', {enabled: false});
+              // Context_AF.particlesRightSide.setAttribute('particle-system', {enabled: false});
+              // Context_AF.particlesLeftSide.setAttribute('particle-system', {enabled: false});
 
 
               if(Context_AF.device === DEVICES.mobile) {
@@ -247,6 +255,10 @@ AFRAME.registerComponent('game-manager', {
             //listens for when the game is ready to begin
             socket.on('playing', (data) => {
               //hide the currently displayed UI and display the playing UI
+
+              //turn on ambient sound
+              const ambientSound = document.querySelector('[sound__ambient]');
+              ambientSound.components.sound__ambient.playSound();
               
               Context_AF.timerPlaceholder.innerText = data.timeLeft;
               Context_AF.scorePlaceholder.innerText = Context_AF.score;
@@ -308,11 +320,11 @@ AFRAME.registerComponent('game-manager', {
                                                     radius: 1.3,
                                                     radiusTubular: 0.04
                                       });
-              obstacleEl.setAttribute('material', {color: 'red'});
+              obstacleEl.setAttribute('material', {color: '#27E5F0'});
               obstacleEl.setAttribute('ring-obstacle', {});
               
-              obstacleEl.setAttribute('obb-collider', {size: 1.5});
-              obstacleEl.className = 'collider'
+              obstacleEl.setAttribute('obb-collider', {size:1.7});
+              obstacleEl.className = 'regularObstacle obstacle'
 
               //display ghost and current player obstacles if this is competitive mode
               if(Context_AF.mode === "competitive") {
@@ -321,12 +333,12 @@ AFRAME.registerComponent('game-manager', {
                                                           radius: 1.3,
                                                           radiusTubular: 0.04
                                             });
-                ghostObstacleEl.setAttribute('obb-collider', {size: 1.5});
+                ghostObstacleEl.setAttribute('obb-collider', {size:1.7});
                 ghostObstacleEl.setAttribute('material', {transparent: true,
-                                                          opacity: 0.25
+                                                          opacity: 0.15
                                             });
                 ghostObstacleEl.setAttribute('ring-obstacle', {});
-                ghostObstacleEl.className = 'ghostCollider'
+                ghostObstacleEl.className = 'ghostCollider obstacle'
                 if(Context_AF.device === DEVICES.mobile) {
                   obstacleEl.object3D.position.set(data.mobileObstacles.x, data.mobileObstacles.y, data.mobileObstacles.z);
                   ghostObstacleEl.object3D.position.set(data.desktopObstacles.x, data.desktopObstacles.y, data.desktopObstacles.z);
@@ -374,12 +386,12 @@ AFRAME.registerComponent('game-manager', {
                 
               const moveX = setInterval(function() {
                 const currPosX = document.querySelector(objectName).object3D.position.x;
-                if(currPosX <= 8 && currPosX >= -8)
+                if(currPosX <= 5 && currPosX >= -5)
                   if(data.dir === "left")
                     document.querySelector(objectName).object3D.position.x -= 0.05;
                   else if(data.dir === "right")
                     document.querySelector(objectName).object3D.position.x += 0.05;
-                if(currPosX > 8 || currPosX < -8 || !Context_AF.horizontalMovement) {
+                if(currPosX > 5 || currPosX < -5 || !Context_AF.horizontalMovement) {
                   clearInterval(moveX);  
                   if(data.dir === "left")
                     document.querySelector(objectName).object3D.position.x += 0.05;
@@ -403,6 +415,8 @@ AFRAME.registerComponent('game-manager', {
                 Context_AF.opponentScorePlaceholder.innerText = Context_AF.opponentScore;
               }
               else {
+                const ambientSound = document.querySelector('[sound__chime]');
+                  ambientSound.components.sound__chime.playSound();
                 Context_AF.score = data.score;
               }
               Context_AF.scorePlaceholder.innerText = Context_AF.score;
@@ -415,6 +429,11 @@ AFRAME.registerComponent('game-manager', {
 
             //listens for when the game has ended
             socket.on('game_end', (data) => {
+
+              //stop sound
+              const ambientSound = document.querySelector('[sound__ambient]');
+              ambientSound.components.sound__ambient.stopSound();
+
               const uiToDisplay = [Context_AF.modeSelectionUI];
               Context_AF.modeSelectionTitle.innerText = 'Game Over!';
               Context_AF.scoreGameOverPlaceholder.innerText = Context_AF.score;
@@ -449,10 +468,15 @@ AFRAME.registerComponent('game-manager', {
               else {
                 document.querySelector('#camera').object3D.position.set(0, 1.6, 0);
               }
-              
 
-              Context_AF.particlesRightSide.setAttribute('particle-system', {enabled: false});
-              Context_AF.particlesLeftSide.setAttribute('particle-system', {enabled: false});
+              //delete all obstacles rings
+              const colliders = document.querySelectorAll('.obstacle');
+              console.log(colliders)
+              for (let i=0; i<colliders.length; i++)
+                colliders[i].parentNode.removeChild(colliders[i]);
+
+              // Context_AF.particlesRightSide.setAttribute('particle-system', {enabled: false});
+              // Context_AF.particlesLeftSide.setAttribute('particle-system', {enabled: false});
               
 
               

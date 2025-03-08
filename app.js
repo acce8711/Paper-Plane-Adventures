@@ -202,11 +202,11 @@ const emitGameStateEvents = function() {
                     {
                         secondsPassed = 0;
                         if(currMode === "competitive")
-                            io.to(PLAYING_ROOM).emit('generate_obstacle', {mobileObstacles: {x:0, y:Math.floor(Math.random() * 10 - 5), z:-50},
-                                                                           desktopObstacles: {x: Math.floor(Math.random() * 10 - 5), y:0, z:-50}
+                            io.to(PLAYING_ROOM).emit('generate_obstacle', {mobileObstacles: {x:0, y:Math.floor(Math.random() * 9 - 5), z:-50},
+                                                                           desktopObstacles: {x: Math.floor(Math.random() * 9 - 5), y:0, z:-50}
                         })
                         else
-                            io.to(PLAYING_ROOM).emit('generate_obstacle', {x: Math.floor(Math.random() * 10 - 5), y:Math.floor(Math.random() * 10 - 5), z:-50})
+                            io.to(PLAYING_ROOM).emit('generate_obstacle', {x: Math.floor(Math.random() * 9 - 5), y:Math.floor(Math.random() * 9 - 5), z:-50})
                     }
 
                 }, 1000)

@@ -5,7 +5,7 @@ AFRAME.registerComponent('cloud-generator', {
         Context_AF.scene = document.querySelector("a-scene");
 
         const cloudsGrp = document.createElement('a-entity');
-        cloudsGrp.object3D.position.set(0, -7, -120);
+        cloudsGrp.object3D.position.set(0, -8, -120);
         cloudsGrp.setAttribute('clouds', {});
 
         const cloudCollider = document.createElement('a-entity');
@@ -17,7 +17,7 @@ AFRAME.registerComponent('cloud-generator', {
         cloudsEl.setAttribute('gltf-model', '#cloud_1_gltf');
 
         const cloudsGrp1 = document.createElement('a-entity');
-        cloudsGrp1.object3D.position.set(0, -7, -240);
+        cloudsGrp1.object3D.position.set(0, -8, -240);
         cloudsGrp1.setAttribute('clouds', {});
 
         const cloudCollider1 = document.createElement('a-entity');
@@ -36,7 +36,7 @@ AFRAME.registerComponent('cloud-generator', {
 
         this.obbCo = setInterval(function() {
             const cloudsGrp2 = document.createElement('a-entity');
-            cloudsGrp2.object3D.position.set(0, -7, -120);
+            cloudsGrp2.object3D.position.set(0, -8, -120);
             cloudsGrp2.setAttribute('clouds', {});
 
             const cloudCollider2 = document.createElement('a-entity');

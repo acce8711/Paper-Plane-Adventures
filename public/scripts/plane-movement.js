@@ -12,7 +12,7 @@ AFRAME.registerComponent('plane-movement', {
 
   tick: function() {
     //add check to see if rotation and pos is different
-    this.el.object3D.position.y = Math.max(-6, (Math.min(6, (this.el.object3D.position.y + this.data.yPosFactor))));
+    this.el.object3D.position.y = Math.max(-5, (Math.min(5, (this.el.object3D.position.y + this.data.yPosFactor))));
     this.el.object3D.rotation.x = this.data.xRotation;
   }
 });
