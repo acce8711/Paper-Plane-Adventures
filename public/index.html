@@ -66,15 +66,15 @@
                 const rotation = Context_AF.camera.object3D.rotation.x;
                             Context_AF.prevRotationX = rotation;
                             //update the amount the camera y position is being updated each frame
-                            Context_AF.yPosFactor = (0.05 * Context_AF.prevRotationX);
+                            Context_AF.yPosFactor = 0.05 * Context_AF.prevRotationX;
                             const event = new CustomEvent("xRotation", {
                                 detail: {
-                                    planeXRotation: Context_AF.prevRotationX,
+                                    planeXRotation: (-1) * Context_AF.prevRotationX,
                                     planeYPosFactor: Context_AF.yPosFactor
                                 }
                             });
                             Context_AF.camera.dispatchEvent(event);
-                Context_AF.camera.object3D.position.y = Context_AF.camera.object3D.position.y + Context_AF.yPosFactor;
+                Context_AF.camera.object3D.position.y = Math.max(-6,(Math.min(6, (Context_AF.camera.object3D.position.y + Context_AF.yPosFactor))));
             },
 
             remove: function() {
@@ -90,7 +90,7 @@
 <body>
 
     <!-- UI used throughout the experience -->
-    <div id="lobbyMessage" class="ui-elements activeUI">
+    <div class="ui-elements activeUI">
     </div>
 
     <div id="lobbyMessage" class="ui-elements activeUI" style="display: none;">
@@ -116,7 +116,7 @@
                 <p>Score</p>
                 <p id="scoreGameOver">67</p>
             </div>
-            <div class="scoreContainer">
+            <div class="scoreContainer" id="opponentScoreGameOverUI" style="display: none;">
                 <p>Opponent score</p>
                 <p id="opponentScoreGameOver">62</p>
             </div>
@@ -133,6 +133,10 @@
 
     <div id="instructionsUI" class="ui-elements" style="display: none;">
         <h1>Instructions</h1>
+
+        <button class="modeButton" id="continueButton">Ready</button>
+        <p id="instructionsWaiting" style="display: none;">Waiting for the other player...</p>
+
         <p>Selected mode: <span id="selectedModePlaceholder">X</span></p>
         <div class="instructions" id="desktopPlayer" style="display: none;">
             <p id="collabInstructionDesktop" style="display: none;">You will control the horizontal plane movement. The other player will control the vertical.</p>
@@ -169,9 +173,6 @@
                 </div>
             </div>
         </div>
-
-        <button class="modeButton" id="continueButton">Ready</button>
-        <p id="instructionsWaiting" style="display: none;">Waiting for the other player...</p>
     </div>
 
     <div id="playingUI" class="ui-elements transparentBg" style="display: none;">
@@ -187,7 +188,7 @@
         </div>
     </div>
 
-    <a-scene  obb-collider="showColliders: false" id="scene">
+    <a-scene  obb-collider="showColliders: true" id="scene">
         <!-- loading in the assets -->
         <a-assets timeOut="10000">
             <img id="sky_img" src="assets/textures/sky.png" crossorigin="anonymous">
@@ -201,6 +202,7 @@
             <a-asset-item id="scene_model" response-type="arraybuffer" src="assets/models/furniture.glb"></a-asset-item>
             <a-asset-item id="clay_model" response-type="arraybuffer" src="assets/models/clay.glb"></a-asset-item>-->
             <a-asset-item id="paper_plane" response-type="arraybuffer" src="assets/models/paper_plane.glb"></a-asset-item> 
+            <a-asset-item id="paper_plane_ghost" response-type="arraybuffer" src="assets/models/PBR - Metallic Roughness Alpha-blend.glb"></a-asset-item> 
             <a-asset-item id="cloud_1_gltf" response-type="arraybuffer" src="assets/models/cloud_1.glb"></a-asset-item> 
         </a-assets>
 
@@ -218,7 +220,6 @@
         <!-- camera -->
         <a-entity id="camera" 
                   camera
-                  wasd-controls
                   position="0 1.6 0">
             <a-entity id="cursor" 
                       cursor="rayOrigin:mouse;"
@@ -227,11 +228,16 @@
         </a-entity>
 
         <a-entity id="plane"
-                  rotation="-20 -180 0" 
+                     plane-collider
+                  rotation="0 0 0" 
                   position="0 0 0"
-                  scale="0.1 0.1 0.1" 
                   gltf-model="#paper_plane">
         </a-entity>
+
+        <a-entity id="colRef"
+                  geometry="primitive: box"
+                  scale="1.5 1.5 0.2"
+                  position="0 -5 -5"></a-entity>
 
         <a-entity game-manager></a-entity>
         <a-entity id="game"></a-entity>

@@ -29,7 +29,7 @@ const PLAYING_ROOM = "playingRoom";
 const playersData = [];
 let currGameState = GAME_STATES.waiting;
 let currMode = "";
-let timeLeft = 20;
+let timeLeft = 40;
 let planeYPos = 1.6;
 
 
@@ -47,15 +47,11 @@ io.on('connection', (socket) => {
     socket.emit("starter_data", {socketId: socket.id, players: playersData});
 
     socket.on('disconnect', () => {
-        console.log(socket.id + " disconnected" );
         //remove the player from players if they are a valid player when they disconnect
         if(playersData.find(player => player.playerId === socket.id))
         {
             const userIndex = playersData.findIndex(item => item.playerId == socket.id);
-            console.log("removal index ", userIndex)
-            console.log("old arr: ", playersData)
             playersData.splice(userIndex, 1);
-            console.log("new arr: ", playersData)
             if(playersData.length > 0)
             {
                 playersData[0].isLeadPlayer = true;
@@ -71,15 +67,12 @@ io.on('connection', (socket) => {
 
     //socket receives the player data such as device type, and if the player is a lead
     socket.on('player_ready', (data) => {   
-        console.log("player ready")
         playersData.push({playerId: socket.id,
                           isLeadPlayer: playersData.length === 0,
                           device: data.device,
                           playerContinue: false,
                           score: 0
         });
-
-        console.log("players: ", playersData);
 
         //valid players are sent to the playing room
         socket.join(PLAYING_ROOM);
@@ -94,7 +87,6 @@ io.on('connection', (socket) => {
 
     //socket listens for when a mode has been selected
     socket.on('mode_selected', (data) => {
-        console.log(data);
         currMode = data;
         currGameState = GAME_STATES.instructions;
         emitGameStateEvents();
@@ -102,19 +94,17 @@ io.on('connection', (socket) => {
 
     //socket listens for when a player is ready to continue (is done reading the instructions)
     socket.on('player_continue', (data) => {
-        console.log("player ready to continue");
         const playerIndex = playersData.findIndex(item => item.playerId === socket.id);
-        console.log("player continue index: ", playerIndex);
         playersData[playerIndex].playerContinue = true;
 
         let numPlayersContinue = 0;
         playersData.forEach(player => {if (player.playerContinue) numPlayersContinue++});
-        console.log("Num of players ready to continueL ", numPlayersContinue);
         //if both players are ready to continue
         if (numPlayersContinue === MAX_PLAYERS)
         {
-            for(player in playersData){
-                player.playerContinue = false;
+            for(let i=0; i<playersData.length; i++){
+                console.log(playersData[i])
+                playersData[i].playerContinue = false;
             }
             currGameState = GAME_STATES.playing;
             emitGameStateEvents();
@@ -128,7 +118,6 @@ io.on('connection', (socket) => {
         {
             const playerIndex = playersData.findIndex(player => player.playerId != socket.id);
             const playerID = playersData[playerIndex].playerId;
-            console.log("playerID",playerID);
             io.to(playerID).emit('plane_update', {mode: currMode, planeXRotation: data.planeXRotation, planeYPosFactor: data.planeYPosFactor});
         }
         })
@@ -192,18 +181,16 @@ const emitGameStateEvents = function() {
             const intervalId = setInterval(function() {
                     secondsPassed += 1;
                     //when timer is up, end the game
-                    console.log(timeLeft);
                     if(timeLeft === 0) {
                         clearInterval(intervalId);
-                        timeLeft = 20;
+                        timeLeft = 40;
                         currGameState = GAME_STATES.gameEnd;
                         emitGameStateEvents();
                     }
                     else if (currGameState === GAME_STATES.waiting)
                     {
-                        console.log("game stopped due to playier leaving")
                         clearInterval(intervalId);
-                        timeLeft = 20;
+                        timeLeft = 40;
                     }
                     else {
                         timeLeft--;
@@ -215,8 +202,8 @@ const emitGameStateEvents = function() {
                     {
                         secondsPassed = 0;
                         if(currMode === "competitive")
-                            io.to(PLAYING_ROOM).emit('generate_obstacle', {leadPlayerObstacles: {x:0, y:Math.floor(Math.random() * 10 - 5), z:-50},
-                                                                           nonLeadPlayerObstacles: {x: Math.floor(Math.random() * 10 - 5), y:0, z:-50}
+                            io.to(PLAYING_ROOM).emit('generate_obstacle', {mobileObstacles: {x:0, y:Math.floor(Math.random() * 10 - 5), z:-50},
+                                                                           desktopObstacles: {x: Math.floor(Math.random() * 10 - 5), y:0, z:-50}
                         })
                         else
                             io.to(PLAYING_ROOM).emit('generate_obstacle', {x: Math.floor(Math.random() * 10 - 5), y:Math.floor(Math.random() * 10 - 5), z:-50})

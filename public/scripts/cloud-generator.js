@@ -4,40 +4,37 @@ AFRAME.registerComponent('cloud-generator', {
         const Context_AF = this;
         Context_AF.scene = document.querySelector("a-scene");
 
-        // const cloudsGrp = document.createElement('a-entity');
-        // cloudsGrp.object3D.position.set(0, -7, -120);
-        // cloudsGrp.setAttribute('clouds', {});
+        const cloudsGrp = document.createElement('a-entity');
+        cloudsGrp.object3D.position.set(0, -7, -120);
+        cloudsGrp.setAttribute('clouds', {});
 
-        // const cloudCollider = document.createElement('a-entity');
-        // cloudCollider.setAttribute('obb-collider', {size: '0.5 0.5 0.5'});
-        // cloudCollider.object3D.position.set(0, 0, -60);
-        // cloudCollider.className = "clouds";
+        const cloudCollider = document.createElement('a-entity');
+        cloudCollider.setAttribute('obb-collider', {size: '0.5 0.5 0.5'});
+        cloudCollider.object3D.position.set(0, 0, -60);
+        cloudCollider.className = "clouds";
 
-        // const cloudsEl = document.createElement('a-entity');
-        // cloudsEl.setAttribute('gltf-model', '#cloud_1_gltf');
+        const cloudsEl = document.createElement('a-entity');
+        cloudsEl.setAttribute('gltf-model', '#cloud_1_gltf');
 
-        // const cloudsGrp1 = document.createElement('a-entity');
-        // cloudsGrp1.object3D.position.set(0, -7, -240);
-        // cloudsGrp1.setAttribute('clouds', {});
+        const cloudsGrp1 = document.createElement('a-entity');
+        cloudsGrp1.object3D.position.set(0, -7, -240);
+        cloudsGrp1.setAttribute('clouds', {});
 
-        // const cloudCollider1 = document.createElement('a-entity');
-        // cloudCollider1.setAttribute('obb-collider', {size: '0.5 0.5 0.5'});
-        // cloudCollider1.object3D.position.set(0, 0, -60);
-        // cloudCollider1.className = "clouds";
+        const cloudCollider1 = document.createElement('a-entity');
+        cloudCollider1.setAttribute('obb-collider', {size: '0.5 0.5 0.5'});
+        cloudCollider1.object3D.position.set(0, 0, -60);
+        cloudCollider1.className = "clouds";
 
-        // const cloudsEl1 = document.createElement('a-entity');
-        // cloudsEl1.setAttribute('gltf-model', '#cloud_1_gltf');
-        
-        
+        const cloudsEl1 = document.createElement('a-entity');
+        cloudsEl1.setAttribute('gltf-model', '#cloud_1_gltf');
 
-        // cloudsGrp.append(cloudsEl, cloudCollider)
-        // Context_AF.scene.appendChild(cloudsGrp);
+        cloudsGrp.append(cloudsEl, cloudCollider)
+        Context_AF.scene.appendChild(cloudsGrp);
 
-        // cloudsGrp1.append(cloudsEl1, cloudCollider1)
-        // Context_AF.scene.appendChild(cloudsGrp1);
+        cloudsGrp1.append(cloudsEl1, cloudCollider1)
+        Context_AF.scene.appendChild(cloudsGrp1);
 
         this.obbCo = setInterval(function() {
-            console.log("creating cloud")
             const cloudsGrp2 = document.createElement('a-entity');
             cloudsGrp2.object3D.position.set(0, -7, -120);
             cloudsGrp2.setAttribute('clouds', {});
@@ -57,7 +54,6 @@ AFRAME.registerComponent('cloud-generator', {
     },
 
     remove: function() {
-        console.log("function removebdsvfhgvshgfd")
         clearInterval(this.obbCo);
     }
 });

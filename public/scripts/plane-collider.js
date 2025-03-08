@@ -1,8 +1,4 @@
 AFRAME.registerComponent('plane-collider', {
-    schema: {
-        
-    },
-
     init: function () {
       const Context_AF = this;
       Context_AF.collideHandler = function(e) {
