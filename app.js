@@ -113,6 +113,9 @@ io.on('connection', (socket) => {
         //if both players are ready to continue
         if (numPlayersContinue === MAX_PLAYERS)
         {
+            for(player in playersData){
+                player.playerContinue = false;
+            }
             currGameState = GAME_STATES.playing;
             emitGameStateEvents();
         }

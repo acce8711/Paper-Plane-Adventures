@@ -15,4 +15,4 @@ const EMPTY_ID = "";
 
 //UI constants
 const HIDE_UI = "none";
-const SHOW_UI = "block";
+const SHOW_UI = "flex";

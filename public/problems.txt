@@ -13,3 +13,12 @@ Successes:
 sources:
 clouds:
 https://www.cgtrader.com/items/644366/download-page
+
+
+icons:
+
+<a href="https://www.flaticon.com/free-icons/desktop" title="desktop icons">Desktop icons created by xnimrodx - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/phone" title="phone icons">Phone icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/wind" title="wind icons">Wind icons created by kmg design - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/select" title="select icons">Select icons created by Tempo_doloe - Flaticon</a>
+https://www.iconpacks.net/free-icon/paper-plane-2563.html#google_vignette

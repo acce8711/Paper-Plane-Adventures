@@ -4,6 +4,9 @@
     <title>Pottery VR</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css"/>
 
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
@@ -87,37 +90,102 @@
 <body>
 
     <!-- UI used throughout the experience -->
-    <div id="waitingUI" class="ui-elements activeUI" style="display: block;">
-        <p>Waiting for the other player to join</p>
+    <div id="lobbyMessage" class="ui-elements activeUI">
+    </div>
+
+    <div id="lobbyMessage" class="ui-elements activeUI" style="display: none;">
+        <h1 id="deviceMessage">The game is full. Come back later...</h1>
+        <p>Only two players can play the game.</p>
+    </div>
+
+    <div id="incorrectDevice" class="ui-elements activeUI" style="display: none;">
+        <h1 id="deviceMessage">You must join on a <span id="devicePlaceHolder">X</span> device.</h1>
+        <p>The other player is already on a <span id="otherDevicePlaceHolder">X</span> device</p>
+        <!-- <img src=""> -->
+    </div>
+
+    <div id="waitingUI" class="ui-elements activeUI" style="display: none;">
+        <h1>Waiting for the other player to join...</h1>
+        <p>You are the lead player</p>
     </div>
 
     <div id="modeSelectionUI" class="ui-elements" style="display: none;">
-        <p>Selecting the mode</p>
+        <h1 id="modeSelection">Mode selection</h1>
+        <div id="gameOverUI" style="display: none;">
+            <div class="scoreContainer">
+                <p>Score</p>
+                <p id="scoreGameOver">67</p>
+            </div>
+            <div class="scoreContainer">
+                <p>Opponent score</p>
+                <p id="opponentScoreGameOver">62</p>
+            </div>
+        </div>
         <div id="modeSelectionButtons" style="display: none;">
-            <button id="competitiveModeButton">Competitive</button>
-            <button id="collaborativeModeButton">Collaborative</button>
+            <p id="waiting">Select a mode:</p>
+            <div>
+                <button class="modeButton" id="competitiveModeButton">Competitive</button>
+                <button class="modeButton" id="collaborativeModeButton">Collaborative</button>
+            </div>
         </div> 
+        <p id="modeSelectionWaiting" style="display: none;">Waiting for the other player to select the mode...</p>
     </div>
 
     <div id="instructionsUI" class="ui-elements" style="display: none;">
-        <p>Displaying the instructions</p>
-        <button id="continueButton">Ready to start playing</button>
+        <h1>Instructions</h1>
+        <p>Selected mode: <span id="selectedModePlaceholder">X</span></p>
+        <div class="instructions" id="desktopPlayer" style="display: none;">
+            <p id="collabInstructionDesktop" style="display: none;">You will control the horizontal plane movement. The other player will control the vertical.</p>
+            <div class="steps">
+                <div class="step">
+                    <img src="assets/textures/moveRightIcon.png"/>
+                    <p>Press the right wind button to move right</p>
+                </div>
+                <div class="step">
+                    <img src="assets/textures/moveLeftIcon.png"/>
+                    <p>Press the left wind button to move left</p>
+                </div>
+                <div class="step">
+                    <img src="assets/textures/hoopIcon.png"/>
+                    <p>Fly through hoops to score</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions" id="mobilePlayer" style="display: none;">
+            <p id="collabInstructionMobile" style="display: none;">You will control the vertical plane movement. The other player will control the horizontal.</p>
+            <div class="steps">
+                <div class="step">
+                    <img src="assets/textures/moveUpIcon.png"/>
+                    <p>Tilt your phone back to move up</p>
+                </div>
+                <div class="step">
+                    <img src="assets/textures/moveDownIcon.png"/>
+                    <p>Tilt your phone forward to move down</p>
+                </div>
+                <div class="step">
+                    <img src="assets/textures/hoopIcon.png"/>
+                    <p>Fly through hoops to score</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="modeButton" id="continueButton">Ready</button>
+        <p id="instructionsWaiting" style="display: none;">Waiting for the other player...</p>
     </div>
 
-    <div id="playingUI" class="ui-elements" style="display: none;">
-        <p>Playing the game</p>
-        <p id="timer">Timer: </p>
-        <p id="score">Score:</p>
-        <p id="opponentScore" style="display: none;">My score: </p>
-        <div id="horizontalControl" class="ui-elements" style="display: none;">
-            <button id="left">Left</button>
-            <button id="right">Right</button>
+    <div id="playingUI" class="ui-elements transparentBg" style="display: none;">
+        <div class="playingInfo">
+            <p>Timer: <span id="timerPlaceholder">X</span></p>
+            <p>Score: <span id="scorePlaceholder">X</span></p>
+            <p id="opponentScore" style="display: none;">Opponent score: <span id="opponentScorePlaceholder">X</span></p>
+        </div>
+        <div id="horizontalControl" style="display: none;">
+            <button class="horizontalControlButton" id="left"><img src="assets/textures/windLeft.png"></button>
+            <button class="horizontalControlButton" id="right"><img src="assets/textures/windRight.png"></button>
         </div>
         </div>
     </div>
-
-
-    
 
     <a-scene  obb-collider="showColliders: false" id="scene">
         <!-- loading in the assets -->
@@ -151,7 +219,6 @@
         <a-entity id="camera" 
                   camera
                   wasd-controls
-                  look-controls
                   position="0 1.6 0">
             <a-entity id="cursor" 
                       cursor="rayOrigin:mouse;"
