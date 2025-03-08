@@ -13,8 +13,8 @@ AFRAME.registerComponent('ring-obstacle', {
       // Do something the component or its entity is detached.
     },
 
-    tick: function () {
+    tick: function (time, delta) {
       // Do something on every scene tick or frame.
-      this.el.object3D.position.z = this.el.object3D.position.z + 0.1;
+      this.el.object3D.position.z = this.el.object3D.position.z + (0.01 * delta);
     }
 });

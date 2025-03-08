@@ -323,7 +323,7 @@ AFRAME.registerComponent('game-manager', {
               obstacleEl.setAttribute('material', {color: '#27E5F0'});
               obstacleEl.setAttribute('ring-obstacle', {});
               
-              obstacleEl.setAttribute('obb-collider', {size:1.7});
+              obstacleEl.setAttribute('obb-collider', {size:1.8});
               obstacleEl.className = 'regularObstacle obstacle'
 
               //display ghost and current player obstacles if this is competitive mode
@@ -333,7 +333,7 @@ AFRAME.registerComponent('game-manager', {
                                                           radius: 1.3,
                                                           radiusTubular: 0.04
                                             });
-                ghostObstacleEl.setAttribute('obb-collider', {size:1.7});
+                ghostObstacleEl.setAttribute('obb-collider', {size:1.8});
                 ghostObstacleEl.setAttribute('material', {transparent: true,
                                                           opacity: 0.15
                                             });
@@ -381,31 +381,42 @@ AFRAME.registerComponent('game-manager', {
 
               let objectName = "#plane";
               if(Context_AF.device === DEVICES.mobile){
-                objectName = data.mode === "competitive" ? '#opponentPlane' : '#camera';
+                objectName = Context_AF.mode === "competitive" ? '#opponentPlane' : '#camera';
               }
+
+              if(data.dir === "left")
+                document.querySelector(objectName).setAttribute('horizontal-movement', {enabled: true, xFactor: -1})
+              else if(data.dir === "right")
+                document.querySelector(objectName).setAttribute('horizontal-movement', {enabled: true, xFactor: 1})
                 
-              const moveX = setInterval(function() {
-                const currPosX = document.querySelector(objectName).object3D.position.x;
-                if(currPosX <= 5 && currPosX >= -5)
-                  if(data.dir === "left")
-                    document.querySelector(objectName).object3D.position.x -= 0.05;
-                  else if(data.dir === "right")
-                    document.querySelector(objectName).object3D.position.x += 0.05;
-                if(currPosX > 5 || currPosX < -5 || !Context_AF.horizontalMovement) {
-                  clearInterval(moveX);  
-                  if(data.dir === "left")
-                    document.querySelector(objectName).object3D.position.x += 0.05;
-                  else if(data.dir === "right")
-                    document.querySelector(objectName).object3D.position.x -= 0.05;
-                }
+            //   const moveX = setInterval(function() {
+            //     const currPosX = document.querySelector(objectName).object3D.position.x;
+            //     if(currPosX <= 5 && currPosX >= -5)
+            //       if(data.dir === "left")
+            //         document.querySelector(objectName).object3D.position.x -= 0.05;
+            //       else if(data.dir === "right")
+            //         document.querySelector(objectName).object3D.position.x += 0.05;
+            //     if(currPosX > 5 || currPosX < -5 || !Context_AF.horizontalMovement) {
+            //       clearInterval(moveX);  
+            //       if(data.dir === "left")
+            //         document.querySelector(objectName).object3D.position.x += 0.05;
+            //       else if(data.dir === "right")
+            //         document.querySelector(objectName).object3D.position.x -= 0.05;
+            //     }
                   
-            }, 16.7)
+            // }, 16.7)
             })
 
             socket.on('stop_horizontal', (data) => {
               Context_AF.horizontalMovement = false;
+              let objectName = "#plane";
+              if(Context_AF.device === DEVICES.mobile){
+                objectName = Context_AF.mode === "competitive" ? '#opponentPlane' : '#camera';
+              }
+              document.querySelector(objectName).setAttribute('horizontal-movement', {enabled: false})
             })
 
+            
             //listens for when the score has been updated
             socket.on('score_update', (data) => {
               

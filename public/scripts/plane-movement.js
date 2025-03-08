@@ -10,9 +10,10 @@ AFRAME.registerComponent('plane-movement', {
     console.log(this.el)
   },
 
-  tick: function() {
+  tick: function(time, delta) {
     //add check to see if rotation and pos is different
-    this.el.object3D.position.y = Math.max(-5, (Math.min(5, (this.el.object3D.position.y + this.data.yPosFactor))));
+    const frameRateFactor = this.data.yPosFactor * delta;
+    this.el.object3D.position.y = Math.max(-5, (Math.min(5, (this.el.object3D.position.y + frameRateFactor))));
     this.el.object3D.rotation.x = this.data.xRotation;
   }
 });
