@@ -241,7 +241,7 @@ AFRAME.registerComponent('game-manager', {
           planeEl.id = "opponentPlane";
           planeEl.object3D.position.set(DESKTOP_PLANE_POS.x, DESKTOP_PLANE_POS.y, DESKTOP_PLANE_POS.z)
           planeEl.setAttribute('gltf-model', '#paper_plane_ghost');
-          planeEl.setAttribute('plane-movement', {});
+          planeEl.setAttribute('vertical-plane-movement', {});
           Context_AF.scene.appendChild(planeEl);
 
           uiToDisplay.push(Context_AF.opponentScoreUI)
@@ -257,7 +257,7 @@ AFRAME.registerComponent('game-manager', {
           Context_AF.camera.setAttribute('vertical-pos-detection', {});
         }
         else {
-          document.querySelector("#plane").setAttribute('plane-movement', {});
+          document.querySelector("#plane").setAttribute('vertical-plane-movement', {});
           uiToDisplay.push(Context_AF.horizontalControlsUI);
         }
 
@@ -396,9 +396,9 @@ function displayUI(uiToDisplay) {
   }
 }
 
-//function updates the plane-movement component properties
+//function updates the vertical-plane-movement component properties
 function planeYPosUpdate (planeID, positionFactor, xRotation) {
-  document.querySelector(planeID).setAttribute('plane-movement', {yPosFactor: positionFactor,
+  document.querySelector(planeID).setAttribute('vertical-plane-movement', {yPosFactor: positionFactor,
                                                                   xRotation: (xRotation)*(-1)
   })
 }
@@ -410,7 +410,7 @@ function removeElements(plane, camera, cloudGenerator, mode) {
   ambientSound.components.sound__ambient.stopSound();
 
   //remove components
-  plane.removeAttribute('plane-movement');
+  plane.removeAttribute('vertical-plane-movement');
   plane.removeAttribute('obb-collider');
   plane.removeAttribute('obb-collider');
 

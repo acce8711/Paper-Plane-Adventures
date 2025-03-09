@@ -10,6 +10,21 @@ const MODES = {
     noMode: 'noMode'
 }
 
+const MOVEMENT_MULT = 0.01;
+
+const HORIZONTAL_MOVEMENT_MULT = 0.005;
+
+const CLOUD_POS = {
+    x: 0,
+    y: -8
+}
+
+const MIN_MAX_POS = {
+    minY: -5,
+    maxY: 5,
+    minX: -5,
+    maxX: 5,
+}
 
 const DESKTOP_CAMERA = {
     x: 0,

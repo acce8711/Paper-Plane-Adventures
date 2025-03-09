@@ -9,91 +9,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css"/>
 
+    <!-- external components -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-environment-component@1.3.3/dist/aframe-environment-component.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-particle-system-component@1.2.0/dist/aframe-particle-system-component.min.js"></script>
 
+    <!-- custom components -->
     <script src="scripts/modified-look-controls.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="scripts/Constants.js"></script>
     <script src="scripts/game-manager.js"></script>
-    <script src="scripts/desktop-plane-movement.js"></script>
-    <script src="scripts/element-generator.js"></script>
     <script src="scripts/ring-obstacle.js"></script>
     <script src="scripts/plane-collider.js"></script>
     <script src="scripts/delete-ring.js"></script>
     <script src="scripts/plane-movement.js"></script>
     <script src="scripts/cloud-generator.js"></script>
-    <script src="scripts/clouds.js"></script>
+    <script src="scripts/cloud-movement.js"></script>
     <script src="scripts/delete-cloud.js"></script>
     <script src="scripts/horizontal-movement.js"></script>
-
-    <script>
-
-            AFRAME.registerComponent('vertical-pos-detection', {
-            init: function () {
-                Context_AF = this;
-                Context_AF.camera = document.querySelector("#camera");
-                Context_AF.plane = document.querySelector("#plane");
-                Context_AF.prevRotationX = Context_AF.camera.object3D.rotation.x;
-                Context_AF.yPosFactor = 0;
-                Context_AF.score = 0;
-
-                //check camera rotation every x seconds and emit an event if the rotation has changed
-                // Context_AF.intervalId = setInterval(function() {
-                //         const rotation = Context_AF.camera.object3D.rotation.x;
-                //         if(Math.abs(Context_AF.prevRotationX - rotation) >= 0.05)
-                //         {
-                //             Context_AF.prevRotationX = rotation;
-                //             //update the amount the camera y position is being updated each frame
-                //             Context_AF.yPosFactor = (0.05 * Context_AF.prevRotationX);
-                //             const event = new CustomEvent("xRotation", {
-                //                 detail: {
-                //                     planeXRotation: Context_AF.prevRotationX,
-                //                     planeYPosFactor: Context_AF.yPosFactor
-                //                 }
-                //             });
-                //             Context_AF.camera.dispatchEvent(event);
-                //         }
-                //     }, 200)
-
-                    
-                        
-
-                
-            },
-
-            tick: function(time, delta) {
-                const rotation = Context_AF.camera.object3D.rotation.x;
-                            Context_AF.prevRotationX = rotation;
-                            //update the amount the camera y position is being updated each frame
-                            Context_AF.yPosFactor = 0.01 * Context_AF.prevRotationX;
-                            const event = new CustomEvent("xRotation", {
-                                detail: {
-                                    planeXRotation: (-1) * Context_AF.prevRotationX,
-                                    planeYPosFactor: Context_AF.yPosFactor 
-                                }
-                            });
-                            Context_AF.camera.dispatchEvent(event);
-                const frameRateFactor = Context_AF.yPosFactor * delta;
-                Context_AF.camera.object3D.position.y = Math.max(-5,(Math.min(5, (Context_AF.camera.object3D.position.y + frameRateFactor))));
-            },
-
-            remove: function() {
-                clearInterval(Context_AF.intervalId);
-            }
-            });
-
-            
-    </script>
-    
-
+    <script src="scripts/vertical-pos-detection.js"></script>
 </head>
 <body>
 
     <!-- UI used throughout the experience -->
-    
-
     <div class="ui-elements activeUI">
         <h1 id="deviceMessage">Loading...</h1>
     </div>
@@ -193,34 +131,27 @@
         </div>
     </div>
 
-    <a-scene  obb-collider="showColliders: false" id="scene">
+    <a-scene obb-collider="showColliders: false" id="scene">
         <!-- loading in the assets -->
         <a-assets timeOut="10000">
+            <!-- images -->
             <img id="sky_img" src="assets/textures/sky.png" crossorigin="anonymous">
 
+            <!-- sounds -->
             <audio id="chime_sound" src="assets/sound/chime.mp3" preload="auto" crossorigin="anonymous"></audio>
             <audio id="ambient_sound" src="assets/sound/ambient.mp3" preload="auto" crossorigin="anonymous"></audio>
-            <!-- <audio id="room_ambience" src="assets/sounds/room-ambience.mp3" preload="auto" crossorigin="anonymous"></audio>
-            <audio id="clay_place" src="assets/sounds/clay-slap.mp3" preload="auto" crossorigin="anonymous"></audio>
-            <audio id="button_sound" src="assets/sounds/button-press.mp3" preload="auto" crossorigin="anonymous"></audio>
-            <audio id="wheel_sound" src="assets/sounds/wheel-spin-cut.mp3" preload="auto" crossorigin="anonymous"></audio>
-            <audio id="pickUp_sound" src="assets/sounds/pick-up.mp3" preload="auto" crossorigin="anonymous"></audio>
-            <audio id="smash_sound" src="assets/sounds/clay-smash2.mp3" preload="auto" crossorigin="anonymous"></audio>
-            <a-asset-item id="room_model" response-type="arraybuffer" src="assets/models/room.glb"></a-asset-item>
-            <a-asset-item id="scene_model" response-type="arraybuffer" src="assets/models/furniture.glb"></a-asset-item>
-            <a-asset-item id="clay_model" response-type="arraybuffer" src="assets/models/clay.glb"></a-asset-item>-->
+           
+            <!-- models -->
             <a-asset-item id="paper_plane" response-type="arraybuffer" src="assets/models/paper_plane.glb"></a-asset-item> 
             <a-asset-item id="paper_plane_ghost" response-type="arraybuffer" src="assets/models/PBR - Metallic Roughness Alpha-blend.glb"></a-asset-item> 
             <a-asset-item id="cloud_1_gltf" response-type="arraybuffer" src="assets/models/cloud_1.glb"></a-asset-item> 
         </a-assets>
 
-        <!-- <a-entity environment="fog: 0.85; ground:none; skyType:gradient; horizonColor:
-        #ffb37d
-        ; skyColor:#c000f5"></a-entity>
+        <!-- management -->
+        <a-entity game-manager></a-entity>
+        <a-entity id="cloudGenerator"></a-entity>
 
-        <a-entity geometry="primitive: sphere; radius: 40;"
-                  material="shader: flat; side: back; src:#sky_img; "></a-entity> -->
-                  <a-sky src="#sky_img"></a-sky>
+        <a-sky src="#sky_img"></a-sky>
         <a-entity light="type:directional; color:#ffdd80; intensity: 0.8"
                   position="-0.5 1 1"></a-entity>
         <a-entity light="type:ambient; color:#fbc5fc; intensity: 0.8"></a-entity>
@@ -232,7 +163,7 @@
 
         <!-- chime sound -->
         <a-entity class="chime-sound" 
-                sound__chime="src:#chime_sound; loop:false; volume: 0.8;">
+                  sound__chime="src:#chime_sound; loop:false; volume: 0.8;">
         </a-entity>
 
         <!-- camera -->
@@ -245,16 +176,13 @@
             </a-entity>
         </a-entity>
 
+        <!-- plane -->
         <a-entity id="plane"
                      plane-collider
                   rotation="0 0 0" 
                   position="0 0 0"
                   gltf-model="#paper_plane">
         </a-entity>
-
-        <a-entity game-manager></a-entity>
-        <a-entity id="cloudGenerator"></a-entity>
-        <!-- <a-entity element-generator id="elementGenerator"></a-entity> -->
 
         <!-- ring removal collider -->
         <a-entity geometry="primitive: box"
@@ -264,6 +192,7 @@
                   delete-ring>
         </a-entity>
 
+        <!-- cloud removal collider -->
         <a-entity geometry="primitive: box"
                   scale="40 40 0.2"
                   position="0 0 11"

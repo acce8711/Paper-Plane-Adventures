@@ -1,7 +1,6 @@
-/* global DeviceOrientationEvent  */
-//import { DeviceOrientationControls } from '../../vendor/DeviceOrientationControls.js';
+//modified look control to constraint rotation to the x-axis
+//original code: https://github.com/aframevr/aframe/blob/master/src/components/look-controls.js
 
-// To avoid recalculation at every mouse movement tick
 var PI_2 = Math.PI / 2;
 
 /**

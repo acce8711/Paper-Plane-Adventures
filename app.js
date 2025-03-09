@@ -186,14 +186,14 @@ const emitGameStateEvents = function() {
                     //when timer is up, end the game
                     if(timeLeft === 0) {
                         clearInterval(intervalId);
-                        timeLeft = 40;
+                        timeLeft = TIME;
                         currGameState = GAME_STATES.gameEnd;
                         emitGameStateEvents();
                     }
                     else if (currGameState === GAME_STATES.waiting)
                     {
                         clearInterval(intervalId);
-                        timeLeft = 40;
+                        timeLeft = TIME;
                     }
                     else {
                         timeLeft--;
