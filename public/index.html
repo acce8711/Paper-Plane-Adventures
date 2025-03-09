@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Pottery VR</title>
+    <title>Paper Plane Glider</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,7 +30,7 @@
 
     <script>
 
-            AFRAME.registerComponent('hi', {
+            AFRAME.registerComponent('vertical-pos-detection', {
             init: function () {
                 Context_AF = this;
                 Context_AF.camera = document.querySelector("#camera");
@@ -253,7 +253,7 @@
         </a-entity>
 
         <a-entity game-manager></a-entity>
-        <a-entity id="game"></a-entity>
+        <a-entity id="cloudGenerator"></a-entity>
         <!-- <a-entity element-generator id="elementGenerator"></a-entity> -->
 
         <!-- ring removal collider -->
