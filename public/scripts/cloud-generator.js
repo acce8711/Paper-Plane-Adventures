@@ -13,7 +13,6 @@ AFRAME.registerComponent('cloud-generator', {
 
         //generate a cloud every 5.5 seconds
         this.cloudGenerator = setInterval(function() {
-            console.log("cloud gene")
             const cloudEl = createCloud(-120);
             Context_AF.scene.appendChild(cloudEl);
         }, 5500)
@@ -32,5 +31,5 @@ function createCloud(posZ) {
     cloudsEl.className = 'clouds';
     cloudsEl.setAttribute('cloud-movement', {});
     cloudsEl.object3D.position.set(CLOUD_POS.x, CLOUD_POS.y, posZ);
-    return cloudsEl;
+    return cloudsEl
 }

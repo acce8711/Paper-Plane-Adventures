@@ -418,8 +418,9 @@ function removeElements(plane, camera, cloudGenerator, mode) {
   camera.removeAttribute('modified-look-controls');
   camera.removeAttribute('vertical-pos-detection');
 
-  if(mode === MODES.competitive)
-    document.querySelector("#opponentPlane").parentNode.removeChild(document.querySelector("#opponentPlane"));
+  const opponentPlane = document.querySelector("#opponentPlane");
+  if(mode === MODES.competitive && opponentPlane)
+    opponentPlane.parentNode.removeChild(document.querySelector("#opponentPlane"));
 
   //delete all obstacles rings
   const colliders = document.querySelectorAll('.obstacle');
@@ -445,18 +446,16 @@ function resetPositions(device, plane, camera) {
 function buildObstacle(mode, colour, className, transparent, opacity) {
   const obstacleEl = document.createElement('a-entity');
   obstacleEl.setAttribute('geometry', {primitive: 'torus',
-                                        radius: 1.5,
-                                        radiusTubular: 0.06});
+                                        radius: 1.8,
+                                        radiusTubular: 0.07});
   obstacleEl.setAttribute('material', {color: colour,
                                        transparent: transparent,
                                        opacity: opacity});
-  //make the collider larger if it's collab mode and smaller if comp mode
-  if(mode === MODES.collaborative)
-    obstacleEl.setAttribute('ring-obstacle', {});
-  else if (mode === MODES.competitive) {
-    obstacleEl.setAttribute('ring-obstacle', {size: 1.8});
-  }
+  
+  obstacleEl.setAttribute('ring-obstacle', {});
+
   obstacleEl.setAttribute('obb-collider', {});
+    
   obstacleEl.className = className;
 
   return obstacleEl
