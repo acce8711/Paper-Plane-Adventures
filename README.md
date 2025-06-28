@@ -41,7 +41,7 @@ This experience requires two players, one on mobile and one on desktop.
 
 This project is not hosted online at the moment. To try it out locally:
 
-1. Download and unzip [Ngrok] (https://ngrok.com/downloads/windows?tab=download) and create a free account
+1. Download and unzip [Ngrok](https://ngrok.com/downloads/windows?tab=download) and create a free account
 2. Download and install [Git](https://git-scm.com/downloads)  
 3. Download and install [Node.js](https://nodejs.org/en/download)  
 4. Clone the repository and run the server:
