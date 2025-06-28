@@ -70,7 +70,7 @@ The hardest part was running into frame rate differences. My phone and computer 
 I'm happy with how the ghost plane and ghost hoops turned out in competitive mode. They were extra features I wasn’t sure I’d have time to finish, but I managed to get them working and I think they help show the other player's position in a clear and non-intrusive way.
 
 ## 🎨 Assets and Attributions
-See the full list of assets used in this project in the ASSETS.md file.
+See the full list of assets used in this project in [ASSETS.md](./ASSETS.md)
 
 ## 📚 Credits
 
