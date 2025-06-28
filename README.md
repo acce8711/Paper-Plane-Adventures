@@ -44,12 +44,13 @@ This project is not hosted online at the moment. To try it out locally:
 1. Download and unzip [Ngrok](https://ngrok.com/downloads/windows?tab=download) and create a free account
 2. Download and install [Git](https://git-scm.com/downloads)  
 3. Download and install [Node.js](https://nodejs.org/en/download)  
-4. Clone the repository and run the server:
+4. Open your terminal and run the following commands to clone the repository and navigate to it:
    - `git clone https://github.com/acce8711/Assignment3-IMD3901B.git`
    - `cd paper-plane-duo`
+5. Run the following commands in the same terminal to start the server:
    - `npm install`
    - `node app.js`
-5. Set up ngrok connection:
+6. Set up ngrok connection:
    - Navigate to the folder where you unzipped Ngrok from step 1
    - Open a new terminal in the folder
    - run `./ngrok.exe config add-authtoken {your Authtoken}` (Your authoken should be visible on the Ngrok web dashboard under Getting started --> Setup & Instillation)
