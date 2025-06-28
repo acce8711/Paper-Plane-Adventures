@@ -44,8 +44,8 @@ This project is not hosted online at the moment. In the meantime, you can run it
 1. Download and install [Git](https://git-scm.com/downloads)  
 2. Download and install [Node.js](https://nodejs.org/en/download)  
 3. Open your terminal and run the following commands to clone the repository and navigate to it:
-   - `git clone https://github.com/acce8711/Assignment3-IMD3901B.git`
-   - `cd Assignment3-IMD3901B`
+   - `git clone https://github.com/acce8711/Paper-Plane-Adventures.git`
+   - `cd Paper-Plane-Adventures`
 4. Run the following commands in the same terminal to start the server:
    - `npm install`
    - `node app.js`
