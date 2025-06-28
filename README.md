@@ -46,7 +46,7 @@ This project is not hosted online at the moment. To try it out locally:
 3. Download and install [Node.js](https://nodejs.org/en/download)  
 4. Open your terminal and run the following commands to clone the repository and navigate to it:
    - `git clone https://github.com/acce8711/Assignment3-IMD3901B.git`
-   - `cd paper-plane-duo`
+   - `cd Assignment3-IMD3901B`
 5. Run the following commands in the same terminal to start the server:
    - `npm install`
    - `node app.js`
