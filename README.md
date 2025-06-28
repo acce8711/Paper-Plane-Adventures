@@ -96,4 +96,4 @@ I'm happy with how the ghost plane and ghost hoops turned out in competitive mod
 
 ## 📚 Credits
 
-This project was developed as part of a third-year design studio course in the [Interactive Multimedia and Design](https://bitdegree.ca/index.php?Program=IMD&Section=Home) program.
+This project was developed as part of a third-year design studio course (IMD3901B) in the [Interactive Multimedia and Design](https://bitdegree.ca/index.php?Program=IMD&Section=Home) program.
