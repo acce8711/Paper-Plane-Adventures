@@ -49,8 +49,8 @@ This project is not hosted online at the moment. In the meantime, you can run it
 4. Run the following commands in the same terminal to start the server:
    - `npm install`
    - `node app.js`
-5. Create an [Ngrok](https://dashboard.ngrok.com/get-started/setup/windows) account.
-6. Open a new terminal and install ngrok by following the instructions on the Ngrok web dashboard under Getting started --> Setup & Installation.
+5. Create an [Ngrok](https://dashboard.ngrok.com/get-started/setup/windows) account
+6. Open a new terminal and install ngrok by following the instructions on the Ngrok web dashboard under Getting started --> Setup & Installation
    
    ![image](https://github.com/user-attachments/assets/495bde99-8b49-44c5-8431-546d91d6d812)
    
@@ -59,7 +59,7 @@ This project is not hosted online at the moment. In the meantime, you can run it
    - `./ngrok.exe config add-authtoken {your Authtoken}` (Your authoken should be visible on the Ngrok web dashboard under Getting started --> Setup & Installation)
    - `./ngrok.exe http http://localhost:8080`
 9. Open the game on both your desktop and phone by clicking the link that the commands from step 7 generate. The link should end with `ngrok-free.app`
-10. You're all set! Choose a mode and follow the instructions on screen.
+10. You're all set! Choose a mode and follow the instructions on screen
 
 ## 🚧 What Was Challenging
 
