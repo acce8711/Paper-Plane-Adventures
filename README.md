@@ -54,9 +54,7 @@ This project is not hosted online at the moment. To try it out locally:
 
 ## 🚧 What Was Challenging
 
-The hardest part was figuring out how to separate and sync the plane’s movement between devices. On mobile, I moved the camera to simulate flight, while on desktop, I moved the airplane model itself. Since the movement worked differently, I decided to create separate components for each.
-
-Another issue I ran into was frame rate differences. My phone and computer both run at 60fps, so syncing looked fine. But when I tested it with a classmate’s 120fps device, the airplane moved too fast. To fix this, I looked at A-Frame’s source code—specifically how they use the `tick()` function in the `wasd-controls` component—and realized I could scale movement using the built-in `deltaTime` value. After implementing that, movement synced properly across devices with different frame rates.
+The hardest part was running into frame rate differences. My phone and computer both run at 60fps, so syncing looked fine. But when I tested it with a classmate’s 120fps device, their airplane moved too fast. To fix this, I looked at A-Frame’s source code and how they use the `tick()` function in the `wasd-controls` component. I realzied I could scale movement using the built-in `deltaTime` value. After implementing that, movement synced properly across devices with different frame rates.
 
 ## ✅ What Went Well
 
