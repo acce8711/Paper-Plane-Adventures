@@ -56,8 +56,8 @@ This project is not hosted online at the moment. In the meantime, you can run it
    
     **Windows users**: Make sure to open a new terminal as administrator
 8. Create an ngrok tunnel to share your local server on the internet by running these commands in the **same terminal window you opened in step 6**:
-   - `./ngrok.exe config add-authtoken {your Authtoken}` (Your authoken should be visible on the Ngrok web dashboard under Getting started --> Setup & Installation)
-   - `./ngrok.exe http http://localhost:8080`
+   - `ngrok config add-authtoken {your Authtoken}` (Your authoken should be visible on the Ngrok web dashboard under Getting started --> Setup & Installation)
+   - `ngrok http http://localhost:8080`
 9. Open the game on both your desktop and phone by clicking the link that the commands from step 7 generate. The link should end with `ngrok-free.app`
 10. You're all set! Choose a mode and follow the instructions on screen
 
